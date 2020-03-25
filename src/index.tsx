@@ -4,11 +4,18 @@ import './index.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
 
+const appWrapperId = 'idb-app-wrapper';
+let wrapper = document.getElementById(appWrapperId) as HTMLElement;
+if (!wrapper) {
+  wrapper = document.createElement('div');
+  wrapper.id = appWrapperId;
+  document.body.appendChild(wrapper);
+}
 ReactDOM.render(
   <React.StrictMode>
     <App />
   </React.StrictMode>,
-  document.getElementById('root')
+  wrapper,
 );
 
 // If you want your app to work offline and load faster, you can change
