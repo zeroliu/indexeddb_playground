@@ -11,8 +11,8 @@ const styles = {
     width: '50vw',
     height: '50vh',
     border: '1px solid red',
-  }
-}
+  },
+};
 
 function handleClick() {
   console.log('click');

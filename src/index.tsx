@@ -1,6 +1,5 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import './index.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
 
@@ -8,6 +7,8 @@ const appWrapperId = 'idb-app-wrapper';
 let wrapper = document.getElementById(appWrapperId) as HTMLElement;
 if (!wrapper) {
   wrapper = document.createElement('div');
+  wrapper.style.cssText =
+    'position: absolute; z-index: 1000; top: 0; bottom: 0; left: 0; right: 0';
   wrapper.id = appWrapperId;
   document.body.appendChild(wrapper);
 }
@@ -15,7 +16,7 @@ ReactDOM.render(
   <React.StrictMode>
     <App />
   </React.StrictMode>,
-  wrapper,
+  wrapper
 );
 
 // If you want your app to work offline and load faster, you can change
