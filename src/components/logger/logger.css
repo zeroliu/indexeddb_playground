@@ -1,0 +1,10 @@
+.idb-logger {
+  width: 100%;
+  height: 100%;
+  overflow-y: scroll;
+  padding: 0 10px;
+}
+
+.idb-logger > p {
+  margin: 10px 2px;
+}

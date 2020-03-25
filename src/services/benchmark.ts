@@ -1,3 +1,5 @@
+import {log} from './logger';
+
 export class Benchmark {
   private startInMs = 0;
   private endInMs = 0;
@@ -23,6 +25,6 @@ export class Benchmark {
   }
 
   log(msg: string) {
-    console.log(`[Benchmark] ${msg}`);
+    log(msg, 'benchmark');
   }
 }
