@@ -4,9 +4,10 @@ const DB_NAME = 'idb_playground_db';
 const DB_VERSION = 1;
 const ABUSER_STORE = 'abuser';
 
-let db: IDBDatabase | null = null;
+let db: IDBDatabase;
 
 export function initIdb() {
+  const benchmark = new Benchmark('initializing idb');
   const request = indexedDB.open(DB_NAME, DB_VERSION);
   request.onerror = event => {
     throw new Error(
@@ -15,23 +16,38 @@ export function initIdb() {
   };
   request.onsuccess = event => {
     db = (event.target as any).result as IDBDatabase;
-    console.log('IndexedDB initialization succeeded.');
+    benchmark.end();
   };
   request.onupgradeneeded = event => {
-    console.log('Upgrading indexedDB.');
+    const benchmark = new Benchmark('upgrading idb');
     const db = (event.target as any).result as IDBDatabase;
     const store = db.createObjectStore(ABUSER_STORE, {autoIncrement: true});
     store.transaction.oncomplete = () => {
-      console.log('store creation completed');
+      benchmark.end();
     };
   };
 }
 
-export function abuseIdb(size: number, quantity: number) {
+function checkIdb() {
   if (!db) {
     throw new Error('DB is not initialized.');
   }
-  const benchmarkAddToIdb = new Benchmark('Adding to idb');
+}
+
+export function clearAbuser() {
+  checkIdb();
+  const benchmark = new Benchmark('Clearing abuser store');
+  const transaction = db.transaction(ABUSER_STORE, 'readwrite');
+  const store = transaction.objectStore(ABUSER_STORE);
+  store.clear();
+  transaction.oncomplete = () => {
+    benchmark.end();
+  };
+}
+
+export function fillAbuser(size: number, quantity: number) {
+  checkIdb();
+  const benchmarkAddToIdb = new Benchmark('Adding to abuser store');
   const benchmarkCreateObj = new Benchmark('Creating idb objects');
   const content = new Array((size * 1024) / 4 + 1).join('abcd');
   const transaction = db.transaction(ABUSER_STORE, 'readwrite');
@@ -42,7 +58,6 @@ export function abuseIdb(size: number, quantity: number) {
   }
   benchmarkCreateObj.end();
   transaction.oncomplete = () => {
-    console.log('transaction completed.');
     benchmarkAddToIdb.end();
   };
 }

@@ -1,5 +1,5 @@
-import React, {FormEvent, useState} from 'react';
-import {abuseIdb} from 'services/idb';
+import React, {useState} from 'react';
+import {fillAbuser, clearAbuser} from 'services/idb';
 
 const styles = {
   dialog: {
@@ -22,42 +22,45 @@ export function App() {
   const [chunkSize, setChunkSize] = useState(CHUNK_OPTIONS[0].value);
   const [quantity, setQuantity] = useState(1);
 
-  const handleSubmit = (e: FormEvent) => {
-    e.preventDefault();
-    console.log(chunkSize, quantity);
-    abuseIdb(chunkSize, quantity);
-  };
-
   return (
     <div>
       <div style={styles.dialog}>
-        <form onSubmit={handleSubmit}>
-          <label>
-            Chunk Size:
-            <select
-              value={chunkSize}
-              onChange={event => {
-                setChunkSize(Number(event.target.value));
-              }}>
-              {CHUNK_OPTIONS.map(option => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            Quantity:
-            <input
-              type="number"
-              value={quantity}
-              onChange={event => {
-                setQuantity(Number(event.target.value));
-              }}
-            />
-          </label>
-          <input type="submit" value="Fill" />
-        </form>
+        <label>
+          Chunk Size:
+          <select
+            value={chunkSize}
+            onChange={event => {
+              setChunkSize(Number(event.target.value));
+            }}>
+            {CHUNK_OPTIONS.map(option => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
+          Quantity:
+          <input
+            type="number"
+            value={quantity}
+            onChange={event => {
+              setQuantity(Number(event.target.value));
+            }}
+          />
+        </label>
+        <button
+          onClick={() => {
+            fillAbuser(chunkSize, quantity);
+          }}>
+          Fill
+        </button>
+        <button
+          onClick={() => {
+            clearAbuser();
+          }}>
+          Clear
+        </button>
       </div>
     </div>
   );
