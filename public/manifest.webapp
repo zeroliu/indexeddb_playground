@@ -1,0 +1,15 @@
+{
+  "name": "IndexedDB Playground",
+  "description": "Tools to test indexedDB features.",
+  "launch_path": "/index.html",
+  "icons": {
+    "512": "/logo512.png",
+    "128": "/logo128.png"
+  },
+  "developer": {
+    "name": "Zero Liu",
+    "url": "http://idb.zeroliu.com"
+  },
+  "default_locale": "en",
+  "type": "privileged",
+}
