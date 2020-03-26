@@ -3,8 +3,8 @@ import {queryStorage} from 'services/storage';
 
 import './free_space_logger.css';
 
-function toMB(bits: number): string {
-  return `${(bits / 1024 / 1024).toFixed(2)}Mb`;
+function toMB(bytes: number): string {
+  return `${(bytes / 1024 / 1024).toFixed(2)}Mb`;
 }
 
 function displayMessage(estimate: StorageEstimate) {
