@@ -5,6 +5,7 @@ import * as serviceWorker from './serviceWorker';
 import {initIdb} from 'services/idb';
 import {Provider} from 'react-redux';
 import {createStore} from 'model/store';
+import {log} from 'services/logger';
 
 const appWrapperId = 'idb-app-wrapper';
 let wrapper = document.getElementById(appWrapperId) as HTMLElement;
@@ -27,6 +28,7 @@ ReactDOM.render(
   wrapper
 );
 
+log('v0.01', 'app');
 initIdb();
 
 // If you want your app to work offline and load faster, you can change

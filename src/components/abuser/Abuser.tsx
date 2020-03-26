@@ -37,6 +37,7 @@ export function Abuser() {
         <input
           type="number"
           value={quantity}
+          min="1"
           onChange={event => {
             setQuantity(Number(event.target.value));
           }}

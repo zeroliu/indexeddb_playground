@@ -54,6 +54,10 @@ export function clearAbuser() {
 
 export function fillAbuser(sizeInKb: number, quantity: number) {
   checkIdb();
+  if (quantity <= 0) {
+    logError('Please provide a positive number for quantity.', 'idb');
+    return;
+  }
   const benchmarkAddToIdb = new Benchmark(
     `Adding ${quantity} x ${sizeInKb}kb entries`
   );
