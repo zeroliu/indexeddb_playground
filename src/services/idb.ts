@@ -1,4 +1,5 @@
 import {Benchmark} from './benchmark';
+import {logError} from './logger';
 
 const DB_NAME = 'idb_playground_db';
 const DB_VERSION = 1;
@@ -10,9 +11,7 @@ export function initIdb() {
   const benchmark = new Benchmark('initializing idb');
   const request = indexedDB.open(DB_NAME, DB_VERSION);
   request.onerror = event => {
-    throw new Error(
-      `${(event.target as any).errorCode}: Error opening indexedDB.`
-    );
+    logError('Error opening indexedDB.', 'idb');
   };
   request.onsuccess = event => {
     db = (event.target as any).result as IDBDatabase;
@@ -24,6 +23,9 @@ export function initIdb() {
     const store = db.createObjectStore(ABUSER_STORE, {autoIncrement: true});
     store.transaction.oncomplete = () => {
       benchmark.end();
+    };
+    store.transaction.onerror = event => {
+      logError('Error creating object store', 'idb');
     };
   };
 }
@@ -43,6 +45,11 @@ export function clearAbuser() {
   transaction.oncomplete = () => {
     benchmark.end();
   };
+  transaction.onerror = e => {
+    benchmark.end();
+    console.log(e);
+    logError('Failed to clear data', 'idb');
+  };
 }
 
 export function fillAbuser(sizeInKb: number, quantity: number) {
@@ -60,6 +67,11 @@ export function fillAbuser(sizeInKb: number, quantity: number) {
   }
   benchmarkCreateObj.end();
   transaction.oncomplete = () => {
+    benchmarkAddToIdb.end();
+  };
+  transaction.onerror = e => {
+    console.log(e);
+    logError('Failed to add data', 'idb');
     benchmarkAddToIdb.end();
   };
 }

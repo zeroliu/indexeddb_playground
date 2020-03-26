@@ -9,3 +9,8 @@
 .idb-logger > p {
   margin: 10px 2px;
 }
+
+.idb-logger-error {
+  color: #721c24;
+  background-color: #f8d7da;
+}
