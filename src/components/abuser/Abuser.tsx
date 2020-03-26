@@ -1,5 +1,6 @@
 import React, {useState} from 'react';
 import {fillAbuser, clearAbuser} from 'services/idb';
+
 import './abuser.css';
 
 const CHUNK_OPTIONS = [

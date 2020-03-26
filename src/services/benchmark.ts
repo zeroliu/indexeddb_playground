@@ -14,7 +14,6 @@ export class Benchmark {
   }
 
   end() {
-    this.log(`${this.name} end`);
     this.endInMs = performance.now();
     this.logTime();
   }
