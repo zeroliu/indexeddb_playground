@@ -13,7 +13,7 @@ const debouncedFlush = debounce(flush, 200);
 
 export function log(msg: string, src: string) {
   const content = `${new Date().toLocaleTimeString()} - [${src}] ${msg}`;
-  logCache.unshift(content);
+  logCache.push(content);
   console.log(content);
   debouncedFlush();
 }

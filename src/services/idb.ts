@@ -45,11 +45,13 @@ export function clearAbuser() {
   };
 }
 
-export function fillAbuser(size: number, quantity: number) {
+export function fillAbuser(sizeInKb: number, quantity: number) {
   checkIdb();
-  const benchmarkAddToIdb = new Benchmark('Adding to abuser store');
+  const benchmarkAddToIdb = new Benchmark(
+    `Adding ${quantity} x ${sizeInKb}kb entries`
+  );
   const benchmarkCreateObj = new Benchmark('Creating idb objects');
-  const content = new Array((size * 1024) / 4 + 1).join('abcd');
+  const content = new Array((sizeInKb * 1024) / 4 + 1).join('abcd');
   const transaction = db.transaction(ABUSER_STORE, 'readwrite');
   const store = transaction.objectStore(ABUSER_STORE);
   for (let i = 0; i < quantity; ++i) {

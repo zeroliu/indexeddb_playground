@@ -3,6 +3,7 @@
   height: 100%;
   overflow-y: scroll;
   padding: 0 10px;
+  box-sizing: border-box;
 }
 
 .idb-logger > p {
