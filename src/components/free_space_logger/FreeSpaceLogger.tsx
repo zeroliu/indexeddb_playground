@@ -1,5 +1,5 @@
-import React, {useState, useEffect} from 'react';
-import {queryStorage} from 'services/storage';
+import React, { useState, useEffect } from 'react';
+import { queryStorage } from 'services/storage';
 
 import './free_space_logger.css';
 
@@ -8,7 +8,7 @@ function toMB(bytes: number): string {
 }
 
 function displayMessage(estimate: StorageEstimate) {
-  const {quota, usage} = estimate;
+  const { quota, usage } = estimate;
 
   if (!quota && !usage) {
     return 'Unable to get storage data';
@@ -25,10 +25,11 @@ function displayMessage(estimate: StorageEstimate) {
 export function FreeSpaceLogger() {
   const [estimate, setEstimate] = useState({});
   useEffect(() => {
-    queryStorage().then(estimate => {
+    const id = setInterval(() => queryStorage().then(estimate => {
       setEstimate(estimate);
-    });
-  });
+    }), 1000);
+    return () => clearInterval(id);
+  }, []);
 
   return (
     <div className="idb-free-space-logger">{displayMessage(estimate)}</div>

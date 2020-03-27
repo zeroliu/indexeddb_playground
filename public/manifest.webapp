@@ -1,5 +1,6 @@
 {
-  "name": "IndexedDB Playground",
+  "name": "idb_playground",
+  "display": "IndexedDB Playground",
   "description": "Tools to test indexedDB features.",
   "launch_path": "/index.html",
   "icons": {
@@ -12,4 +13,11 @@
   },
   "default_locale": "en",
   "type": "privileged",
+  "permissions": {
+    "device-storage:videos": {
+      "access": "readonly"
+    }
+  },
+  "cursor": true,
+  "version": "0.01"
 }

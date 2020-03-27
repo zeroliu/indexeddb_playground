@@ -1,11 +1,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import {App} from './components/app/App';
+import { App } from './components/app/App';
 import * as serviceWorker from './serviceWorker';
-import {initIdb} from 'services/idb';
-import {Provider} from 'react-redux';
-import {createStore} from 'model/store';
-import {log} from 'services/logger';
+import { initIdb } from 'services/idb';
+import { Provider } from 'react-redux';
+import { createStore } from 'model/store';
+import { log } from 'services/logger';
 
 const appWrapperId = 'idb-app-wrapper';
 let wrapper = document.getElementById(appWrapperId) as HTMLElement;
@@ -30,6 +30,15 @@ ReactDOM.render(
 
 log('v0.01', 'app');
 initIdb();
+
+function handleKeydown(event: any) {
+  switch (event.key) {
+    case 'SoftRight':
+      (document.activeElement as HTMLElement).blur();
+      console.log('right key pressed');
+  }
+}
+document.addEventListener('keydown', handleKeydown);
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.
