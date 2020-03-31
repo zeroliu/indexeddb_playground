@@ -8,7 +8,7 @@ export const logsReducer: Reducer<Log[], LogsAction> = (
 ) => {
   switch (action.type) {
     case LOGS_ADDED:
-      return [...state, ...action.payload];
+      return [...state, ...action.payload].slice(-100);
   }
   return state;
 };
