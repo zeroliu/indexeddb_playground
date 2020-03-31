@@ -1,5 +1,3 @@
-import {logError} from './logger';
-
 interface KaiOSDeviceStorage {
   freeSpace: () => any;
 }
@@ -22,11 +20,8 @@ export async function queryStorage(): Promise<StorageEstimate> {
           resolve({quota: this.result});
         };
         request.onerror = function() {
-          logError(
-              `Unable to get the space used by videos: ${this.error}`,
-              'storage');
           reject(this.error);
-        }
+        };
       });
     }
   }
