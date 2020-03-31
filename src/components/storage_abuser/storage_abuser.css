@@ -16,7 +16,7 @@
 }
 
 .storage-abuser-btn-group > button {
-  flex-basis: 50px;
+  flex-basis: 100px;
   border: 1px solid rgba(0, 0, 0, 0.2);
   margin: 5px;
 }

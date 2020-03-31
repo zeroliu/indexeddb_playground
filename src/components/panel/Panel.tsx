@@ -1,13 +1,6 @@
 import React, {useState} from 'react';
 import {StorageAbuser} from 'components/storage_abuser/StorageAbuser';
-import {
-  fillAbuser as idbFillAbuser,
-  clearAbuser as idbClearAbuser,
-} from 'services/idb';
-import {
-  fillAbuser as lsFillAbuser,
-  clearAbuser as lsClearAbuser,
-} from 'services/localstorage';
+import {getAbuser} from 'services/abuser_registry';
 
 import './panel.css';
 
@@ -16,30 +9,26 @@ interface Tool {
   component: JSX.Element;
 }
 
-const TOOL_OPTIONS: Record<string, Tool> = {
-  idbAbuser: {
-    label: 'IndexedDB Abuser',
-    component: (
-      <StorageAbuser fillAbuser={idbFillAbuser} clearAbuser={idbClearAbuser} />
-    ),
-  },
-  localStorageAbuser: {
-    label: 'LocalStorage Abuser',
-    component: (
-      <StorageAbuser fillAbuser={lsFillAbuser} clearAbuser={lsClearAbuser} />
-    ),
-  },
-};
-
-function renderTool(key: string) {
-  if (!TOOL_OPTIONS[key]) {
-    throw new Error(`Error finding ${key}`);
-  }
-  return TOOL_OPTIONS[key].component;
-}
-
 export function Panel() {
   const [selectedTool, setSelectedTool] = useState('idbAbuser');
+
+  const TOOL_OPTIONS: Record<string, Tool> = {
+    idbAbuser: {
+      label: 'IndexedDB Abuser',
+      component: <StorageAbuser abuser={getAbuser('idb')} />,
+    },
+    localStorageAbuser: {
+      label: 'LocalStorage Abuser',
+      component: <StorageAbuser abuser={getAbuser('localStorage')} />,
+    },
+  };
+
+  function renderTool(key: string) {
+    if (!TOOL_OPTIONS[key]) {
+      throw new Error(`Error finding ${key}`);
+    }
+    return TOOL_OPTIONS[key].component;
+  }
 
   return (
     <div className="panel">

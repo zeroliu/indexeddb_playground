@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import {queryStorage} from 'services/storage';
+import {getAllAbusers} from 'services/abuser_registry';
 
 import './free_space_logger.css';
 
@@ -22,30 +22,34 @@ function displayEstimate(estimate: StorageEstimate) {
   return `${toMB(usage!)} / ${toMB(quota!)}`;
 }
 
-function calculateLocalStorageUsage() {
-  return new Blob([
-    ...Object.values(localStorage),
-    ...Object.keys(localStorage),
-  ]).size;
-}
-
 export function FreeSpaceLogger() {
-  const [estimate, setEstimate] = useState({});
-  const [localStorageEstimate, setLocalStorageEstimate] = useState(0);
+  const [storageTexts, setStorageTexts] = useState<string[]>([]);
   useEffect(() => {
     const id = setInterval(() => {
-      queryStorage().then(estimate => {
-        setEstimate(estimate);
+      Promise.all(
+        getAllAbusers().map(async abuser => {
+          const estimate = await abuser.estimate();
+          return {
+            name: abuser.name,
+            estimate,
+          };
+        })
+      ).then(results => {
+        setStorageTexts(
+          results.map(
+            result => `${result.name}: ${displayEstimate(result.estimate)}`
+          )
+        );
       });
-      setLocalStorageEstimate(calculateLocalStorageUsage());
     }, 1000);
     return () => clearInterval(id);
   }, []);
 
   return (
     <div className="free-space-logger">
-      <div>Total: {displayEstimate(estimate)}</div>
-      <div>LocalStorage: {toMB(localStorageEstimate)}</div>
+      {storageTexts.map(text => (
+        <div key={text}>{text}</div>
+      ))}
     </div>
   );
 }
