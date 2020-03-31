@@ -1,4 +1,4 @@
-.idb-abuser {
+.storage-abuser {
   background: rgba(0, 0, 0, 0.2);
   display: flex;
   flex-direction: column;
@@ -7,15 +7,15 @@
   box-sizing: border-box;
 }
 
-.idb-abuser > label {
+.storage-abuser > label {
   display: flex;
 }
 
-.idb-abuser-btn-group {
+.storage-abuser-btn-group {
   display: flex;
 }
 
-.idb-abuser-btn-group > button {
+.storage-abuser-btn-group > button {
   flex-basis: 50px;
   border: 1px solid rgba(0, 0, 0, 0.2);
   margin: 5px;

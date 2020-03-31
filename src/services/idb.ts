@@ -38,7 +38,7 @@ function checkIdb() {
 
 export function clearAbuser() {
   checkIdb();
-  const benchmark = new Benchmark('Clearing abuser store');
+  const benchmark = new Benchmark('Clearing idb abuser store');
   const transaction = db.transaction(ABUSER_STORE, 'readwrite');
   const store = transaction.objectStore(ABUSER_STORE);
   store.clear();
@@ -58,11 +58,11 @@ export function fillAbuser(sizeInKb: number, quantity: number) {
     logError('Please provide a positive number for quantity.', 'idb');
     return;
   }
-  const benchmarkAddToIdb = new Benchmark(
-    `Adding ${quantity} x ${sizeInKb}kb entries`
-  );
-  const benchmarkCreateObj = new Benchmark('Creating idb objects');
   const content = new Array((sizeInKb * 1024) / 4 + 1).join('abcd');
+  const benchmarkCreateObj = new Benchmark('Creating idb objects');
+  const benchmarkAddToIdb = new Benchmark(
+    `Adding ${quantity} x ${sizeInKb}kb entries to idb`
+  );
   const transaction = db.transaction(ABUSER_STORE, 'readwrite');
   const store = transaction.objectStore(ABUSER_STORE);
   for (let i = 0; i < quantity; ++i) {

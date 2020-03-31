@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
-import {fillAbuser, clearAbuser} from 'services/idb';
+import {FreeSpaceLogger} from 'components/free_space_logger/FreeSpaceLogger';
 
-import './abuser.css';
+import './storage_abuser.css';
 
 const CHUNK_OPTIONS = [
   {value: 5, label: '5KB'},
@@ -12,12 +12,21 @@ const CHUNK_OPTIONS = [
   {value: 500 * 1024, label: '500MB'},
 ];
 
-export function Abuser() {
+type FillAbuserFunc = (size: number, quantity: number) => void;
+type ClearAbuserFunc = () => void;
+
+interface Props {
+  fillAbuser: FillAbuserFunc;
+  clearAbuser: ClearAbuserFunc;
+}
+
+export function StorageAbuser({fillAbuser, clearAbuser}: Props) {
   const [chunkSize, setChunkSize] = useState(CHUNK_OPTIONS[0].value);
   const [quantity, setQuantity] = useState(1);
 
   return (
-    <div className="idb-abuser">
+    <div className="storage-abuser">
+      <FreeSpaceLogger />
       <label>
         Chunk Size:
         <select
@@ -43,7 +52,7 @@ export function Abuser() {
           }}
         />
       </label>
-      <div className="idb-abuser-btn-group">
+      <div className="storage-abuser-btn-group">
         <button
           onClick={() => {
             fillAbuser(chunkSize, quantity);
