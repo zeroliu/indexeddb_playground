@@ -2,6 +2,7 @@ import {logError} from './logger';
 import {Benchmark} from './benchmark';
 import {v4 as uuid} from 'uuid';
 import {BaseAbuser} from './base_abuser';
+import {generateString} from './mock_data';
 
 export class LocalStorageAbuser extends BaseAbuser {
   constructor() {
@@ -36,7 +37,7 @@ export class LocalStorageAbuser extends BaseAbuser {
       return Promise.reject();
     }
     try {
-      const content = this.generateString(sizeInKb);
+      const content = generateString(sizeInKb);
       const benchmarkAdd = new Benchmark(
         `Adding ${quantity} x ${sizeInKb}kb entries to localStorage`
       );

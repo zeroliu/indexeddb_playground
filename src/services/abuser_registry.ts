@@ -1,4 +1,6 @@
+import {IdbAbuser} from 'services/idb_abuser';
 import {BaseAbuser} from './base_abuser';
+import {LocalStorageAbuser} from 'services/local_storage_abuser';
 
 let abusers: Record<string, BaseAbuser> = {};
 
@@ -14,7 +16,10 @@ export function getAllAbusers() {
   return Object.keys(abusers).map(name => abusers[name]);
 }
 
-export function addAbuser(abuser: BaseAbuser) {
+function addAbuser(abuser: BaseAbuser) {
   abuser.init();
   abusers[abuser.name] = abuser;
 }
+
+addAbuser(new IdbAbuser());
+addAbuser(new LocalStorageAbuser());

@@ -10,13 +10,13 @@ function toMB(bytes: number): string {
 function displayEstimate(estimate: StorageEstimate) {
   const {quota, usage} = estimate;
 
-  if (!quota && !usage) {
+  if (quota === undefined && usage === undefined) {
     return 'unknown';
   }
-  if (!quota && usage) {
+  if (quota === undefined && usage !== undefined) {
     return `Used ${toMB(usage)}`;
   }
-  if (!usage && quota) {
+  if (usage === undefined && quota !== undefined) {
     return `${toMB(quota)} available`;
   }
   return `${toMB(usage!)} / ${toMB(quota!)}`;

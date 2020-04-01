@@ -2,12 +2,9 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import {App} from './components/app/App';
 import * as serviceWorker from './serviceWorker';
-import {IdbAbuser} from 'services/idb_abuser';
 import {Provider} from 'react-redux';
 import {createStore} from 'model/store';
 import {log} from 'services/logger';
-import {addAbuser} from 'services/abuser_registry';
-import {LocalStorageAbuser} from 'services/local_storage_abuser';
 
 const appWrapperId = 'idb-app-wrapper';
 let wrapper = document.getElementById(appWrapperId) as HTMLElement;
@@ -20,8 +17,6 @@ if (!wrapper) {
 }
 
 const store = createStore();
-addAbuser(new IdbAbuser());
-addAbuser(new LocalStorageAbuser());
 
 ReactDOM.render(
   <React.StrictMode>

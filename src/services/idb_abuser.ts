@@ -1,6 +1,7 @@
 import {Benchmark} from './benchmark';
 import {logError, log} from './logger';
 import {BaseAbuser} from './base_abuser';
+import {generateString} from './mock_data';
 
 const DB_NAME = 'idb_playground_db';
 const DB_VERSION = 1;
@@ -98,7 +99,7 @@ export class IdbAbuser extends BaseAbuser {
       logError('Please provide a positive number for quantity.', 'idb');
       return Promise.reject();
     }
-    const content = this.generateString(sizeInKb);
+    const content = generateString(sizeInKb);
     const benchmarkCreateObj = new Benchmark('Creating idb objects');
     const benchmarkAddToIdb = new Benchmark(
       `Adding ${quantity} x ${sizeInKb}kb entries to idb`

@@ -3,6 +3,7 @@ import {StorageAbuser} from 'components/storage_abuser/StorageAbuser';
 import {getAbuser} from 'services/abuser_registry';
 
 import './panel.css';
+import {Performance} from 'components/performance/Performance';
 
 interface Tool {
   label: string;
@@ -10,7 +11,7 @@ interface Tool {
 }
 
 export function Panel() {
-  const [selectedTool, setSelectedTool] = useState('idbAbuser');
+  const [selectedTool, setSelectedTool] = useState('benchmark');
 
   const TOOL_OPTIONS: Record<string, Tool> = {
     idbAbuser: {
@@ -20,6 +21,10 @@ export function Panel() {
     localStorageAbuser: {
       label: 'LocalStorage Abuser',
       component: <StorageAbuser abuser={getAbuser('localStorage')} />,
+    },
+    benchmark: {
+      label: 'Performance Benchmark',
+      component: <Performance />,
     },
   };
 
