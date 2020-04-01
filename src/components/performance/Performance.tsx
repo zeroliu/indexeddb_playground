@@ -22,9 +22,9 @@ export function Performance() {
     setIsRunning(true);
     const {ci, mean, median} = await runTest(selectedTestCase);
     log(
-      `${selectedTestCase.label} - ${mean.toFixed(2)}(mean) ${median.toFixed(
+      `${selectedTestCase.label} - ${mean.toFixed(2)}ms(mean) ${median.toFixed(
         2
-      )}(median) [${ci[0].toFixed(2)}, ${ci[1].toFixed(2)}]`,
+      )}ms(median) [${ci[0].toFixed(2)}, ${ci[1].toFixed(2)}]`,
       'performance'
     );
     setIsRunning(false);

@@ -1,12 +1,13 @@
 import {ci, median, mean} from './stats';
-import {localStorageReadTestCase} from './performance/local_storage_read';
-import {localStorageWriteTestCase} from './performance/local_storage_write';
+import {localStorageWriteTestCases} from './performance/local_storage_write';
+import {localStorageReadTestCases} from './performance/local_storage_read';
 
 export interface PerformanceTestCase {
   name: string;
   label: string;
   description: string;
   benchmark: () => Promise<number>;
+  prep?: () => Promise<void>;
 }
 
 interface PerformanceReport {
@@ -17,8 +18,10 @@ interface PerformanceReport {
 
 let testCases: Record<string, PerformanceTestCase> = {};
 
-function addTestCase(testCase: PerformanceTestCase) {
-  testCases[testCase.name] = testCase;
+function addTestCases(inputs: PerformanceTestCase[]) {
+  for (let testCase of inputs) {
+    testCases[testCase.name] = testCase;
+  }
 }
 
 export function getTestCase(name: string) {
@@ -32,26 +35,45 @@ export function getAllTestCases() {
   return Object.keys(testCases).map(key => testCases[key]);
 }
 
-export async function runTest(
-  testCase: PerformanceTestCase
-): Promise<PerformanceReport> {
-  return new Promise((resolve, reject) => {
+function nextFrame<T>(callback: () => T): Promise<T> {
+  return new Promise(resolve => {
     requestAnimationFrame(() => {
-      requestAnimationFrame(async () => {
-        const iteration = 1000;
-        const results = [];
-        for (let i = 0; i < iteration; ++i) {
-          results.push(await testCase.benchmark());
-        }
-        resolve({
-          ci: ci(results),
-          median: median(results),
-          mean: mean(results),
-        });
-      });
+      setTimeout(() => {
+        resolve(callback());
+      }, 0);
     });
   });
 }
 
-addTestCase(localStorageReadTestCase);
-addTestCase(localStorageWriteTestCase);
+function runBenchmark(benchmark: () => Promise<number>): Promise<number> {
+  return new Promise(resolve => {
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        resolve(benchmark());
+      }, 0);
+    });
+  });
+}
+
+export async function runTest(
+  testCase: PerformanceTestCase
+): Promise<PerformanceReport> {
+  return new Promise(async resolve => {
+    const iteration = 1000;
+    const results = [];
+    if (testCase.prep) {
+      await testCase.prep();
+    }
+    for (let i = 0; i < iteration; ++i) {
+      results.push(await nextFrame(testCase.benchmark));
+    }
+    resolve({
+      ci: ci(results),
+      median: median(results),
+      mean: mean(results),
+    });
+  });
+}
+
+addTestCases(localStorageWriteTestCases);
+addTestCases(localStorageReadTestCases);
