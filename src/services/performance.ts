@@ -35,16 +35,22 @@ export function getAllTestCases() {
 export async function runTest(
   testCase: PerformanceTestCase
 ): Promise<PerformanceReport> {
-  const iteration = 1000;
-  const results = [];
-  for (let i = 0; i < iteration; ++i) {
-    results.push(await testCase.benchmark());
-  }
-  return {
-    ci: ci(results),
-    median: median(results),
-    mean: mean(results),
-  };
+  return new Promise((resolve, reject) => {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(async () => {
+        const iteration = 1000;
+        const results = [];
+        for (let i = 0; i < iteration; ++i) {
+          results.push(await testCase.benchmark());
+        }
+        resolve({
+          ci: ci(results),
+          median: median(results),
+          mean: mean(results),
+        });
+      });
+    });
+  });
 }
 
 addTestCase(localStorageReadTestCase);

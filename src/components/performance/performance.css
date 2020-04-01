@@ -18,3 +18,20 @@
   height: 30px;
   background: rgba(255, 255, 255, 0.8);
 }
+
+.performance-btn:disabled {
+  color: rgba(0, 0, 0, 0.5);
+}
+
+.performance-bottom {
+  display: flex;
+}
+
+.performance-gif {
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+.performance-bottom > * {
+  flex: 1;
+}
