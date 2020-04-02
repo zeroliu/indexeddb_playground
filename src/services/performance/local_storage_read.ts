@@ -20,8 +20,14 @@ function prep(iteration: number, blob: string) {
   return Promise.resolve();
 }
 
+function cleanup() {
+  localStorage.clear();
+  return Promise.resolve();
+}
+
 const baseCase = {
   iteration: 1000,
+  cleanup,
 };
 
 const read1000x100B: PerformanceTestCase = {

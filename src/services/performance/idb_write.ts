@@ -12,7 +12,7 @@ function benchmarkWrite(iteration: number, blob: string) {
     request.onupgradeneeded = e => {
       const db = (e.target as any).result as IDBDatabase;
       db.createObjectStore('entries', {
-        autoIncrement: true,
+        keyPath: 'key',
       });
     };
 
@@ -22,7 +22,7 @@ function benchmarkWrite(iteration: number, blob: string) {
       const transaction = db.transaction('entries', 'readwrite');
       const store = transaction.objectStore('entries');
       for (let i = 0; i < iteration; ++i) {
-        store.add(blob);
+        store.add({key: `doc_${i}`, blob});
       }
       transaction.onerror = () => {
         logError('Error adding items to idb', 'idb_write');

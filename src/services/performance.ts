@@ -2,6 +2,7 @@ import {ci, median, mean} from './stats';
 import {localStorageWriteTestCases} from './performance/local_storage_write';
 import {localStorageReadTestCases} from './performance/local_storage_read';
 import {idbWriteTestCases} from './performance/idb_write';
+import {idbReadTestCases} from './performance/idb_read';
 
 export interface PerformanceTestCase {
   name: string;
@@ -9,6 +10,7 @@ export interface PerformanceTestCase {
   benchmark: () => Promise<number>;
   iteration: number;
   prep?: () => Promise<void>;
+  cleanup?: () => Promise<void>;
 }
 
 interface PerformanceReport {
@@ -59,6 +61,9 @@ export async function runTest(
       onProgress(`${Math.ceil((i / testCase.iteration) * 100)}%`);
       results.push(await nextFrame(testCase.benchmark));
     }
+    if (testCase.cleanup) {
+      await testCase.cleanup();
+    }
     resolve({
       ci: ci(results),
       median: median(results),
@@ -70,3 +75,4 @@ export async function runTest(
 addTestCases(localStorageWriteTestCases);
 addTestCases(localStorageReadTestCases);
 addTestCases(idbWriteTestCases);
+addTestCases(idbReadTestCases);
