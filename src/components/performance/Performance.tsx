@@ -9,6 +9,7 @@ import './performance.css';
 /** Sub panel to test performance. */
 export function Performance() {
   const [selectedName, setSelectedName] = useState(getAllTestCases()[0].name);
+  const [finishedTestCount, setFinishedTestCount] = useState('');
   const [isRunning, setIsRunning] = useState(false);
   const testCases = getAllTestCases();
   const selectedTestCase = getTestCase(selectedName);
@@ -20,7 +21,9 @@ export function Performance() {
   async function handleClick() {
     log(`${selectedTestCase.label} start`, 'performance');
     setIsRunning(true);
-    const {ci, mean, median} = await runTest(selectedTestCase);
+    const {ci, mean, median} = await runTest(selectedTestCase, percent => {
+      setFinishedTestCount(percent);
+    });
     log(
       `${selectedTestCase.label} - ${mean.toFixed(2)}ms(mean) ${median.toFixed(
         2
@@ -33,9 +36,6 @@ export function Performance() {
   return (
     <div className="performance">
       <FreeSpaceLogger />
-      <div className="performance-description">
-        {selectedTestCase.description}
-      </div>
       <select
         className="performance-select"
         value={selectedTestCase.name}
@@ -51,7 +51,7 @@ export function Performance() {
           disabled={isRunning}
           className="performance-btn"
           onClick={handleClick}>
-          Start
+          {isRunning ? finishedTestCount : 'Start'}
         </button>
         <div
           style={{backgroundImage: `url('kirby.gif')`}}

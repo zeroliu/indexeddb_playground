@@ -1,12 +1,13 @@
 import {ci, median, mean} from './stats';
 import {localStorageWriteTestCases} from './performance/local_storage_write';
 import {localStorageReadTestCases} from './performance/local_storage_read';
+import {idbWriteTestCases} from './performance/idb_write';
 
 export interface PerformanceTestCase {
   name: string;
   label: string;
-  description: string;
   benchmark: () => Promise<number>;
+  iteration: number;
   prep?: () => Promise<void>;
 }
 
@@ -45,26 +46,17 @@ function nextFrame<T>(callback: () => T): Promise<T> {
   });
 }
 
-function runBenchmark(benchmark: () => Promise<number>): Promise<number> {
-  return new Promise(resolve => {
-    requestAnimationFrame(() => {
-      setTimeout(() => {
-        resolve(benchmark());
-      }, 0);
-    });
-  });
-}
-
 export async function runTest(
-  testCase: PerformanceTestCase
+  testCase: PerformanceTestCase,
+  onProgress: (percent: string) => void
 ): Promise<PerformanceReport> {
   return new Promise(async resolve => {
-    const iteration = 1000;
     const results = [];
     if (testCase.prep) {
       await testCase.prep();
     }
-    for (let i = 0; i < iteration; ++i) {
+    for (let i = 0; i < testCase.iteration; ++i) {
+      onProgress(`${Math.ceil((i / testCase.iteration) * 100)}%`);
       results.push(await nextFrame(testCase.benchmark));
     }
     resolve({
@@ -77,3 +69,4 @@ export async function runTest(
 
 addTestCases(localStorageWriteTestCases);
 addTestCases(localStorageReadTestCases);
+addTestCases(idbWriteTestCases);

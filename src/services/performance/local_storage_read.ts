@@ -20,42 +20,46 @@ function prep(iteration: number, blob: string) {
   return Promise.resolve();
 }
 
+const baseCase = {
+  iteration: 1000,
+};
+
 const read1000x100B: PerformanceTestCase = {
+  ...baseCase,
   name: 'localStorageRead1000x100B',
   label: 'localStorage read 1000x100B',
-  description: '',
   benchmark: () => benchmarkRead(1000),
   prep: () => prep(1000, generateString(0.1)),
 };
 
 const read10000x100B: PerformanceTestCase = {
+  ...baseCase,
   name: 'localStorageRead10000x100B',
   label: 'localStorage read 10000x100B',
-  description: '',
   benchmark: () => benchmarkRead(10000),
   prep: () => prep(10000, generateString(0.1)),
 };
 
 const read100x500B: PerformanceTestCase = {
+  ...baseCase,
   name: 'localStorageRead100x500B',
   label: 'localStorage read 100x500B',
-  description: '',
   benchmark: () => benchmarkRead(100),
   prep: () => prep(100, generateString(0.5)),
 };
 
 const read100x1KB: PerformanceTestCase = {
+  ...baseCase,
   name: 'localStorageRead100x1KB',
   label: 'localStorage read 100x1KB',
-  description: '',
   benchmark: () => benchmarkRead(100),
   prep: () => prep(100, generateString(1)),
 };
 
 const read100x5KB: PerformanceTestCase = {
+  ...baseCase,
   name: 'localStorageRead100x5KB',
   label: 'localStorage read 100x5KB',
-  description: '',
   benchmark: () => benchmarkRead(100),
   prep: () => prep(100, generateString(5)),
 };

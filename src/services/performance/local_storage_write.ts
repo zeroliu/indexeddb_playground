@@ -12,45 +12,49 @@ function benchmarkWrite(iteration: number, blob: string) {
   return Promise.resolve(end - start);
 }
 
+const baseCase = {
+  iteration: 1000,
+};
+
 const write10x100B: PerformanceTestCase = {
+  ...baseCase,
   name: 'localStorageWrite10x100B',
   label: 'localStorage write 10x100B',
-  description: '',
   benchmark: () => benchmarkWrite(10, generateString(0.1)),
 };
 
 const write100x100B: PerformanceTestCase = {
+  ...baseCase,
   name: 'localStorageWrite100x100B',
   label: 'localStorage write 100x100B',
-  description: '',
   benchmark: () => benchmarkWrite(100, generateString(0.1)),
 };
 
 const write1000x100B: PerformanceTestCase = {
+  ...baseCase,
   name: 'localStorageWrite1000x100B',
   label: 'localStorage write 1000x100B',
-  description: '',
   benchmark: () => benchmarkWrite(1000, generateString(0.1)),
 };
 
 const write100x500B: PerformanceTestCase = {
+  ...baseCase,
   name: 'localStorageWrite100x500B',
   label: 'localStorage write 100x500B',
-  description: '',
   benchmark: () => benchmarkWrite(100, generateString(0.5)),
 };
 
 const write100x1KB: PerformanceTestCase = {
+  ...baseCase,
   name: 'localStorageWrite100x1KB',
   label: 'localStorage write 100x1KB',
-  description: '',
   benchmark: () => benchmarkWrite(100, generateString(1)),
 };
 
 const write100x5KB: PerformanceTestCase = {
+  ...baseCase,
   name: 'localStorageWrite100x5KB',
   label: 'localStorage write 100x5KB',
-  description: '',
   benchmark: () => benchmarkWrite(100, generateString(5)),
 };
 

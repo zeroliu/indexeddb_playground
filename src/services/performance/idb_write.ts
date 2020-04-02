@@ -1,51 +1,93 @@
 import {generateString} from 'services/mock_data';
 import {PerformanceTestCase} from 'services/performance';
+import {logError} from 'services/logger';
 
 function benchmarkWrite(iteration: number, blob: string) {
-  const start = performance.now();
-  const end = performance.now();
-  return Promise.resolve(end - start);
+  return new Promise<number>((resolve, reject) => {
+    const request = indexedDB.open('idb-playground-benchmark', 1);
+    request.onerror = () => {
+      logError('Error opening idb', 'idb_write');
+      reject('Error opening idb');
+    };
+    request.onupgradeneeded = e => {
+      const db = (e.target as any).result as IDBDatabase;
+      db.createObjectStore('entries', {
+        autoIncrement: true,
+      });
+    };
+
+    request.onsuccess = e => {
+      const db = (e.target as any).result as IDBDatabase;
+      const start = performance.now();
+      const transaction = db.transaction('entries', 'readwrite');
+      const store = transaction.objectStore('entries');
+      for (let i = 0; i < iteration; ++i) {
+        store.add(blob);
+      }
+      transaction.onerror = () => {
+        logError('Error adding items to idb', 'idb_write');
+        reject('Error adding items to idb');
+      };
+      transaction.oncomplete = () => {
+        const end = performance.now();
+        db.close();
+        const request = indexedDB.deleteDatabase('idb-playground-benchmark');
+        request.onerror = () => {
+          logError('Error deleting idb', 'idb_write');
+          reject('Error deleting idb');
+        };
+        request.onsuccess = () => {
+          resolve(end - start);
+        };
+      };
+    };
+  });
 }
 
+const baseCase = {
+  // idb tests are really slow. Only run 100 iterations.
+  iteration: 100,
+};
+
 const write10x100B: PerformanceTestCase = {
+  ...baseCase,
   name: 'idbWrite10x100B',
   label: 'idb write 10x100B',
-  description: '',
   benchmark: () => benchmarkWrite(10, generateString(0.1)),
 };
 
 const write100x100B: PerformanceTestCase = {
+  ...baseCase,
   name: 'idbWrite100x100B',
   label: 'idb write 100x100B',
-  description: '',
   benchmark: () => benchmarkWrite(100, generateString(0.1)),
 };
 
 const write1000x100B: PerformanceTestCase = {
+  ...baseCase,
   name: 'idbWrite1000x100B',
   label: 'idb write 1000x100B',
-  description: '',
   benchmark: () => benchmarkWrite(1000, generateString(0.1)),
 };
 
 const write100x500B: PerformanceTestCase = {
+  ...baseCase,
   name: 'idbWrite100x500B',
   label: 'idb write 100x500B',
-  description: '',
   benchmark: () => benchmarkWrite(100, generateString(0.5)),
 };
 
 const write100x1KB: PerformanceTestCase = {
+  ...baseCase,
   name: 'idbWrite100x1KB',
   label: 'idb write 100x1KB',
-  description: '',
   benchmark: () => benchmarkWrite(100, generateString(1)),
 };
 
 const write100x5KB: PerformanceTestCase = {
+  ...baseCase,
   name: 'idbWrite100x5KB',
   label: 'idb write 100x5KB',
-  description: '',
   benchmark: () => benchmarkWrite(100, generateString(5)),
 };
 
