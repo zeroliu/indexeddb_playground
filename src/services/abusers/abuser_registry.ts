@@ -1,6 +1,6 @@
-import {IdbAbuser} from 'services/idb_abuser';
+import {IdbAbuser} from 'services/abusers/idb_abuser';
 import {BaseAbuser} from './base_abuser';
-import {LocalStorageAbuser} from 'services/local_storage_abuser';
+import {LocalStorageAbuser} from 'services/abusers/local_storage_abuser';
 
 let abusers: Record<string, BaseAbuser> = {};
 

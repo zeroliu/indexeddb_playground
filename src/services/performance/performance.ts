@@ -1,9 +1,9 @@
-import {ci, median, mean} from './stats';
-import {localStorageWriteTestCases} from './performance/local_storage_write';
-import {localStorageReadTestCases} from './performance/local_storage_read';
-import {idbWriteTestCases} from './performance/idb_write';
-import {idbReadTestCases} from './performance/idb_read';
-import {idbRangeReadTestCases} from './performance/idb_range_read';
+import {ci, median, mean} from '../stats';
+import {localStorageWriteTestCases} from './local_storage_write';
+import {localStorageReadTestCases} from './local_storage_read';
+import {idbWriteTestCases} from './idb_write';
+import {idbReadTestCases} from './idb_read';
+import {idbRangeReadTestCases} from './idb_range_read';
 
 export interface PerformanceTestCase {
   name: string;

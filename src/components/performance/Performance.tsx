@@ -1,7 +1,11 @@
 import React, {useState} from 'react';
 
 import {FreeSpaceLogger} from 'components/free_space_logger/FreeSpaceLogger';
-import {getAllTestCases, getTestCase, runTest} from 'services/performance';
+import {
+  getAllTestCases,
+  getTestCase,
+  runTest,
+} from 'services/performance/performance';
 import {log} from 'services/logger';
 
 import './performance.css';

@@ -2,7 +2,7 @@ import React, {useState} from 'react';
 import {FreeSpaceLogger} from 'components/free_space_logger/FreeSpaceLogger';
 
 import './storage_abuser.css';
-import {BaseAbuser} from 'services/base_abuser';
+import {BaseAbuser} from 'services/abusers/base_abuser';
 
 const CHUNK_OPTIONS = [
   {value: 5, label: '5KB'},

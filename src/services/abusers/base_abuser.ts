@@ -1,4 +1,4 @@
-import {log} from './logger';
+import {log} from 'services/logger';
 
 interface KaiOSDeviceStorage {
   freeSpace: () => any;

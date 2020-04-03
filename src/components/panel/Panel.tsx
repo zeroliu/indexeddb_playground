@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import {StorageAbuser} from 'components/storage_abuser/StorageAbuser';
-import {getAbuser} from 'services/abuser_registry';
+import {getAbuser} from 'services/abusers/abuser_registry';
 
 import './panel.css';
 import {Performance} from 'components/performance/Performance';

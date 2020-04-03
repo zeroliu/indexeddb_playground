@@ -1,5 +1,5 @@
 import {generateString} from 'services/mock_data';
-import {PerformanceTestCase} from 'services/performance';
+import {PerformanceTestCase} from 'services/performance/performance';
 
 function benchmarkWrite(iteration: number, blob: string) {
   localStorage.clear();

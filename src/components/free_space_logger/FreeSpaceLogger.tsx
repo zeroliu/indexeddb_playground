@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import {getAllAbusers} from 'services/abuser_registry';
+import {getAllAbusers} from 'services/abusers/abuser_registry';
 
 import './free_space_logger.css';
 

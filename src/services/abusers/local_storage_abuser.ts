@@ -1,8 +1,8 @@
-import {logError} from './logger';
-import {Benchmark} from './benchmark';
+import {logError} from 'services/logger';
+import {Benchmark} from 'services/benchmark';
 import {v4 as uuid} from 'uuid';
 import {BaseAbuser} from './base_abuser';
-import {generateString} from './mock_data';
+import {generateString} from 'services/mock_data';
 
 export class LocalStorageAbuser extends BaseAbuser {
   constructor() {

@@ -1,5 +1,5 @@
 import {generateString} from 'services/mock_data';
-import {PerformanceTestCase} from 'services/performance';
+import {PerformanceTestCase} from 'services/performance/performance';
 import {logError} from 'services/logger';
 
 function benchmarkWrite(iteration: number, blob: string) {
