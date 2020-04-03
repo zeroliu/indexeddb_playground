@@ -129,11 +129,18 @@ const baseCase = {
   prep,
 };
 
-const rangeReadSingleGet: PerformanceTestCase = {
+const rangeReadSingleGet500: PerformanceTestCase = {
   ...baseCase,
-  name: 'idbRangeReadSingleGet',
-  label: 'idb read 500x100B blob by getting each items in its own transaction',
+  name: 'idb500RangeReadSingleGet',
+  label: 'idb read 500x100B blob by getting each item in its own transaction',
   benchmark: () => benchmarkReadSingleGet(500),
+};
+
+const rangeReadSingleGet1000: PerformanceTestCase = {
+  ...baseCase,
+  name: 'idbRange1000ReadSingleGet',
+  label: 'idb read 1000x100B blob by getting each item in its own transaction',
+  benchmark: () => benchmarkReadSingleGet(1000),
 };
 
 const rangeReadRange: PerformanceTestCase = {
@@ -143,4 +150,8 @@ const rangeReadRange: PerformanceTestCase = {
   benchmark: () => benchmarkReadRange(500),
 };
 
-export const idbRangeReadTestCases = [rangeReadSingleGet, rangeReadRange];
+export const idbRangeReadTestCases = [
+  rangeReadSingleGet500,
+  rangeReadSingleGet1000,
+  rangeReadRange,
+];

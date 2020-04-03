@@ -1,9 +1,9 @@
 import React, {useState} from 'react';
 import {StorageAbuser} from 'components/storage_abuser/StorageAbuser';
 import {getAbuser} from 'services/abusers/abuser_registry';
+import {Performance} from 'components/performance/Performance';
 
 import './panel.css';
-import {Performance} from 'components/performance/Performance';
 
 interface Tool {
   label: string;
@@ -17,6 +17,10 @@ export function Panel() {
     idbAbuser: {
       label: 'IndexedDB Abuser',
       component: <StorageAbuser abuser={getAbuser('idb')} />,
+    },
+    cacheAbuser: {
+      label: 'Cache Abuser',
+      component: <StorageAbuser abuser={getAbuser('cacheAPI')} />,
     },
     localStorageAbuser: {
       label: 'LocalStorage Abuser',

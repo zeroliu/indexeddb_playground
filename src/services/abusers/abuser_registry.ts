@@ -1,6 +1,7 @@
-import {IdbAbuser} from 'services/abusers/idb_abuser';
+import {IdbAbuser} from './idb_abuser';
 import {BaseAbuser} from './base_abuser';
-import {LocalStorageAbuser} from 'services/abusers/local_storage_abuser';
+import {LocalStorageAbuser} from './local_storage_abuser';
+import {CacheAbuser} from './cache_abuser';
 
 let abusers: Record<string, BaseAbuser> = {};
 
@@ -22,4 +23,5 @@ function addAbuser(abuser: BaseAbuser) {
 }
 
 addAbuser(new IdbAbuser());
+addAbuser(new CacheAbuser());
 addAbuser(new LocalStorageAbuser());
