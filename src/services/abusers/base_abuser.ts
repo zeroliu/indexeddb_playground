@@ -1,35 +1,4 @@
-import {log} from 'services/logger';
-
-interface KaiOSDeviceStorage {
-  freeSpace: () => any;
-}
-interface KaiOSNavigator extends Navigator {
-  getDeviceStorage: (type: string) => KaiOSDeviceStorage;
-}
-
-export async function queryStorage(): Promise<StorageEstimate> {
-  if ('storage' in navigator && 'estimate' in navigator.storage) {
-    return await navigator.storage.estimate();
-  }
-
-  if ('getDeviceStorage' in navigator) {
-    const kaiOSNavigator = navigator as KaiOSNavigator;
-    const storage = kaiOSNavigator.getDeviceStorage('videos');
-    if (storage) {
-      return new Promise((resolve, reject) => {
-        const request = storage.freeSpace();
-        request.onsuccess = function() {
-          resolve({quota: this.result});
-        };
-        request.onerror = function() {
-          reject(this.error);
-        };
-      });
-    }
-  }
-
-  return Promise.resolve({});
-}
+import { log, logError } from 'services/logger';
 
 export abstract class BaseAbuser {
   autoFillStarted = false;
@@ -48,13 +17,18 @@ export abstract class BaseAbuser {
     try {
       await this.fill(sizeInKb, 1);
     } catch (e) {
+      logError(e.message, this.name);
       this.autoFillStarted = false;
-      log('Auto fill completed', this.name);
+      log('Auto fill stopped', this.name);
     }
     this.fillUntilFull(sizeInKb);
   }
 
   startAutoFill(sizeInKb: number) {
+    if (this.autoFillStarted) {
+      // auto filler already started.
+      return;
+    }
     this.autoFillStarted = true;
     this.fillUntilFull(sizeInKb);
   }

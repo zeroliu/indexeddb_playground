@@ -1,7 +1,7 @@
-import {Benchmark} from 'services/benchmark';
-import {logError, log} from 'services/logger';
-import {BaseAbuser} from './base_abuser';
-import {generateString} from 'services/mock_data';
+import { Benchmark } from 'services/benchmark';
+import { logError, log } from 'services/logger';
+import { BaseAbuser } from './base_abuser';
+import { generateString } from 'services/mock_data';
 
 const DB_NAME = 'idb_playground_db';
 const DB_VERSION = 1;
@@ -28,14 +28,16 @@ export class IdbAbuser extends BaseAbuser {
         logError('Error opening indexedDB.', this.name);
         reject();
       };
-      request.onsuccess = event => {
-        this.db = (event.target as any).result as IDBDatabase;
+      request.onsuccess = () => {
+        this.db = request.result;
         log('indexedDB successfully opened', this.name);
         resolve();
       };
-      request.onupgradeneeded = event => {
-        const db = (event.target as any).result as IDBDatabase;
-        const store = db.createObjectStore(ABUSER_STORE, {autoIncrement: true});
+      request.onupgradeneeded = () => {
+        const db = request.result;
+        const store = db.createObjectStore(ABUSER_STORE, {
+          autoIncrement: true,
+        });
         store.transaction.oncomplete = () => {};
         store.transaction.onerror = () => {
           logError('Error creating object store', this.name);
@@ -63,11 +65,11 @@ export class IdbAbuser extends BaseAbuser {
       if (storage) {
         return new Promise((resolve, reject) => {
           const request = storage.freeSpace();
-          request.onsuccess = function() {
-            resolve({quota: this.result});
+          request.onsuccess = () => {
+            resolve({ quota: request.result });
           };
-          request.onerror = function() {
-            reject(this.error);
+          request.onerror = () => {
+            reject(request.error);
           };
         });
       }
@@ -85,9 +87,8 @@ export class IdbAbuser extends BaseAbuser {
       transaction.oncomplete = () => {
         resolve();
       };
-      transaction.onerror = e => {
-        console.log(e);
-        logError('Failed to clear data', 'idb');
+      transaction.onerror = () => {
+        logError(transaction.error.message, 'idb');
         reject();
       };
     });
@@ -102,13 +103,16 @@ export class IdbAbuser extends BaseAbuser {
     const content = generateString(sizeInKb);
     const benchmarkCreateObj = new Benchmark('Creating idb objects');
     const benchmarkAddToIdb = new Benchmark(
-      `Adding ${quantity} x ${sizeInKb}kb entries to idb`
+      `Adding ${quantity} x ${sizeInKb}kb entries to idb`,
     );
     const transaction = this.db!.transaction(ABUSER_STORE, 'readwrite');
     const store = transaction.objectStore(ABUSER_STORE);
     for (let i = 0; i < quantity; ++i) {
-      const blob = new Blob([content], {type: 'text/plain'});
-      store.add(blob);
+      const blob = new Blob([content], { type: 'text/plain' });
+      const request = store.add(blob);
+      request.onerror = () => {
+        logError(request.error!.message, 'idb');
+      };
     }
     benchmarkCreateObj.end();
     return new Promise((resolve, reject) => {
@@ -116,9 +120,8 @@ export class IdbAbuser extends BaseAbuser {
         benchmarkAddToIdb.end();
         resolve();
       };
-      transaction.onerror = e => {
-        console.log(e);
-        logError('Failed to add data', 'idb');
+      transaction.onerror = () => {
+        logError(transaction.error.message, 'idb');
         benchmarkAddToIdb.end();
         reject();
       };
