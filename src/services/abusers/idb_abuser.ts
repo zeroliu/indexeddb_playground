@@ -85,6 +85,7 @@ export class IdbAbuser extends BaseAbuser {
     store.clear();
     return new Promise((resolve, reject) => {
       transaction.oncomplete = () => {
+        log('Successfully cleared idb.', 'idb');
         resolve();
       };
       transaction.onerror = () => {
