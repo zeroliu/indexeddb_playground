@@ -92,6 +92,37 @@ function benchmarkReadSingleGet() {
   });
 }
 
+function benchmarkReadCursor() {
+  return new Promise<number>((resolve, reject) => {
+    const results: Record<string, {}> = {};
+    const request = indexedDB.open('idb-playground-benchmark', 1);
+
+    request.onsuccess = () => {
+      const db = request.result;
+      const start = performance.now();
+      const transaction = db.transaction('entries', 'readonly');
+      const store = transaction.objectStore('entries');
+      const storeRequest = store.openCursor();
+      storeRequest.onsuccess = () => {
+        const cursor = storeRequest.result;
+        if (cursor && cursor.value.index < 100) {
+          results[cursor.key as string] = cursor.value;
+          cursor.continue();
+        } else {
+          const end = performance.now();
+          db.close();
+          resolve(end - start);
+        }
+      };
+      storeRequest.onerror = e => {
+        const msg = (e.target as any).error.message;
+        logError(msg, 'idb_read');
+        reject(msg);
+      };
+    };
+  });
+}
+
 function benchmarkReadKeyRange() {
   return new Promise<number>((resolve, reject) => {
     const results: Record<string, {}> = {};
@@ -147,4 +178,15 @@ const rangeReadKeyRange: PerformanceTestCase = {
   benchmark: () => benchmarkReadKeyRange(),
 };
 
-export const idbRangeReadTestCases = [rangeReadSingleGet, rangeReadKeyRange];
+const rangeReadCursor: PerformanceTestCase = {
+  ...baseCase,
+  name: 'idbRangeReadCursor',
+  label: 'idb read 100x100B blob with cursor.',
+  benchmark: () => benchmarkReadCursor(),
+};
+
+export const idbRangeReadTestCases = [
+  rangeReadSingleGet,
+  rangeReadKeyRange,
+  rangeReadCursor,
+];
