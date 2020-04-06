@@ -5,28 +5,32 @@ import {logError} from 'services/logger';
 function prep() {
   return new Promise<void>((resolve, reject) => {
     const request = indexedDB.open('idb-playground-benchmark', 1);
-    request.onerror = e => {
-      const msg = (e.target as any).error.message;
+    request.onerror = () => {
+      const msg = request.error!.message;
       logError(msg, 'idb_range_read');
       reject(msg);
     };
-    request.onupgradeneeded = e => {
-      const db = (e.target as any).result as IDBDatabase;
+    request.onupgradeneeded = () => {
+      const db = request.result;
       const store = db.createObjectStore('entries', {
         keyPath: 'key',
       });
       store.createIndex('index', 'index', {unique: true});
     };
 
-    request.onsuccess = e => {
-      const db = (e.target as any).result as IDBDatabase;
+    request.onsuccess = () => {
+      const db = request.result;
       const transaction = db.transaction('entries', 'readwrite');
       const store = transaction.objectStore('entries');
-      for (let i = 0; i < 1000; ++i) {
-        store.add({key: `doc_${i}`, blob: generateString(0.1), index: i});
+      for (let i = 0; i < 200; ++i) {
+        store.add({
+          key: `doc_${i}`,
+          blob: generateString(100 / 1024),
+          index: i,
+        });
       }
-      transaction.onerror = e => {
-        const msg = (e.target as any).error.message;
+      transaction.onerror = () => {
+        const msg = transaction.error.message;
         logError(msg, 'idb_range_read');
         reject(msg);
       };
@@ -41,8 +45,8 @@ function prep() {
 function cleanup() {
   return new Promise<void>((resolve, reject) => {
     const request = indexedDB.deleteDatabase('idb-playground-benchmark');
-    request.onerror = e => {
-      const msg = (e.target as any).error.message;
+    request.onerror = () => {
+      const msg = request.error!.message;
       logError(msg, 'idb_range_read');
       reject(msg);
     };
@@ -61,15 +65,15 @@ async function getByKey(db: IDBDatabase, key: string) {
     request.onsuccess = () => {
       resolve(request.result);
     };
-    request.onerror = e => {
-      const msg = (e.target as any).error.message;
+    request.onerror = () => {
+      const msg = request.error!.message;
       logError(msg, 'idb_range_read');
       reject(msg);
     };
   });
 }
 
-function benchmarkReadSingleGet(itemCount: number) {
+function benchmarkReadSingleGet() {
   return new Promise<number>(resolve => {
     const results: Record<string, {}> = {};
     const request = indexedDB.open('idb-playground-benchmark', 1);
@@ -77,7 +81,7 @@ function benchmarkReadSingleGet(itemCount: number) {
     request.onsuccess = async () => {
       const db = request.result;
       const start = performance.now();
-      for (let i = 0; i < itemCount; ++i) {
+      for (let i = 0; i < 100; ++i) {
         const key = `doc_${i}`;
         results[key] = await getByKey(db, key);
       }
@@ -88,15 +92,15 @@ function benchmarkReadSingleGet(itemCount: number) {
   });
 }
 
-function benchmarkReadRange(itemCount: number) {
+function benchmarkReadKeyRange() {
   return new Promise<number>((resolve, reject) => {
     const results: Record<string, {}> = {};
     const request = indexedDB.open('idb-playground-benchmark', 1);
 
-    request.onsuccess = async e => {
+    request.onsuccess = () => {
       const db = request.result;
       const start = performance.now();
-      const keyRange = IDBKeyRange.bound(0, itemCount - 1);
+      const keyRange = IDBKeyRange.bound(0, 99);
       const transaction = db.transaction('entries', 'readonly');
       const store = transaction.objectStore('entries');
       const index = store.index('index');
@@ -129,29 +133,18 @@ const baseCase = {
   prep,
 };
 
-const rangeReadSingleGet500: PerformanceTestCase = {
+const rangeReadSingleGet: PerformanceTestCase = {
   ...baseCase,
-  name: 'idb500RangeReadSingleGet',
-  label: 'idb read 500x100B blob by getting each item in its own transaction',
-  benchmark: () => benchmarkReadSingleGet(500),
+  name: 'idbRangeReadSingleGet',
+  label: 'idb read 100x100B blob by getting each item in its own transaction',
+  benchmark: () => benchmarkReadSingleGet(),
 };
 
-const rangeReadSingleGet1000: PerformanceTestCase = {
-  ...baseCase,
-  name: 'idbRange1000ReadSingleGet',
-  label: 'idb read 1000x100B blob by getting each item in its own transaction',
-  benchmark: () => benchmarkReadSingleGet(1000),
-};
-
-const rangeReadRange: PerformanceTestCase = {
+const rangeReadKeyRange: PerformanceTestCase = {
   ...baseCase,
   name: 'idbRangeReadRange',
-  label: 'idb read 500x100B blob with key range.',
-  benchmark: () => benchmarkReadRange(500),
+  label: 'idb read 100x100B blob with key range.',
+  benchmark: () => benchmarkReadKeyRange(),
 };
 
-export const idbRangeReadTestCases = [
-  rangeReadSingleGet500,
-  rangeReadSingleGet1000,
-  rangeReadRange,
-];
+export const idbRangeReadTestCases = [rangeReadSingleGet, rangeReadKeyRange];

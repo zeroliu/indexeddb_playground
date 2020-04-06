@@ -30,28 +30,28 @@ const baseCase = {
   cleanup,
 };
 
-const read1000x100B: PerformanceTestCase = {
+const read1MB: PerformanceTestCase = {
   ...baseCase,
-  name: 'localStorageRead1000x100B',
-  label: 'localStorage read 1000x100B',
-  benchmark: () => benchmarkRead(1000),
-  prep: () => prep(1000, generateString(0.1)),
+  name: 'localStorageRead1MB',
+  label: 'localStorage read 1MB',
+  benchmark: () => benchmarkRead(1),
+  prep: () => prep(1, generateString(1024)),
 };
 
-const read10000x100B: PerformanceTestCase = {
+const read1KB: PerformanceTestCase = {
   ...baseCase,
-  name: 'localStorageRead10000x100B',
-  label: 'localStorage read 10000x100B',
-  benchmark: () => benchmarkRead(10000),
-  prep: () => prep(10000, generateString(0.1)),
+  name: 'localStorageRead1KB',
+  label: 'localStorage read 1KB',
+  benchmark: () => benchmarkRead(1),
+  prep: () => prep(10, generateString(1)),
 };
 
-const read100x500B: PerformanceTestCase = {
+const read1024x100B: PerformanceTestCase = {
   ...baseCase,
-  name: 'localStorageRead100x500B',
-  label: 'localStorage read 100x500B',
-  benchmark: () => benchmarkRead(100),
-  prep: () => prep(100, generateString(0.5)),
+  name: 'localStorageRead1024x100B',
+  label: 'localStorage read 1024x100B',
+  benchmark: () => benchmarkRead(1024),
+  prep: () => prep(1024, generateString(100 / 1024)),
 };
 
 const read100x1KB: PerformanceTestCase = {
@@ -62,18 +62,9 @@ const read100x1KB: PerformanceTestCase = {
   prep: () => prep(100, generateString(1)),
 };
 
-const read100x5KB: PerformanceTestCase = {
-  ...baseCase,
-  name: 'localStorageRead100x5KB',
-  label: 'localStorage read 100x5KB',
-  benchmark: () => benchmarkRead(100),
-  prep: () => prep(100, generateString(5)),
-};
-
 export const localStorageReadTestCases = [
-  read1000x100B,
-  read10000x100B,
-  read100x500B,
+  read1MB,
+  read1KB,
+  read1024x100B,
   read100x1KB,
-  read100x5KB,
 ];

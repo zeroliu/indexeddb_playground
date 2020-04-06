@@ -4,6 +4,8 @@ import {localStorageReadTestCases} from './local_storage_read';
 import {idbWriteTestCases} from './idb_write';
 import {idbReadTestCases} from './idb_read';
 import {idbRangeReadTestCases} from './idb_range_read';
+import {cacheWriteTestCases} from './cache_write';
+import {cacheReadTestCases} from './cache_read';
 
 export interface PerformanceTestCase {
   name: string;
@@ -78,3 +80,5 @@ addTestCases(localStorageReadTestCases);
 addTestCases(idbWriteTestCases);
 addTestCases(idbReadTestCases);
 addTestCases(idbRangeReadTestCases);
+addTestCases(cacheWriteTestCases);
+addTestCases(cacheReadTestCases);

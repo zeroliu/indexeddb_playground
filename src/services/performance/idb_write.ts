@@ -49,32 +49,25 @@ const baseCase = {
   iteration: 100,
 };
 
-const write10x100B: PerformanceTestCase = {
+const write1MB: PerformanceTestCase = {
   ...baseCase,
-  name: 'idbWrite10x100B',
-  label: 'idb write 10x100B',
-  benchmark: () => benchmarkWrite(10, generateString(0.1)),
+  name: 'idbWrite1MB',
+  label: 'idb write 1MB',
+  benchmark: () => benchmarkWrite(1, generateString(1024)),
 };
 
-const write100x100B: PerformanceTestCase = {
+const write1KB: PerformanceTestCase = {
   ...baseCase,
-  name: 'idbWrite100x100B',
-  label: 'idb write 100x100B',
-  benchmark: () => benchmarkWrite(100, generateString(0.1)),
+  name: 'idbWrite1KB',
+  label: 'idb write 1KB',
+  benchmark: () => benchmarkWrite(1, generateString(1)),
 };
 
-const write1000x100B: PerformanceTestCase = {
+const write1024x100B: PerformanceTestCase = {
   ...baseCase,
-  name: 'idbWrite1000x100B',
-  label: 'idb write 1000x100B',
-  benchmark: () => benchmarkWrite(1000, generateString(0.1)),
-};
-
-const write100x500B: PerformanceTestCase = {
-  ...baseCase,
-  name: 'idbWrite100x500B',
-  label: 'idb write 100x500B',
-  benchmark: () => benchmarkWrite(100, generateString(0.5)),
+  name: 'idbWrite1024x100B',
+  label: 'idb write 1024x100B',
+  benchmark: () => benchmarkWrite(1024, generateString(100 / 1024)),
 };
 
 const write100x1KB: PerformanceTestCase = {
@@ -84,18 +77,9 @@ const write100x1KB: PerformanceTestCase = {
   benchmark: () => benchmarkWrite(100, generateString(1)),
 };
 
-const write100x5KB: PerformanceTestCase = {
-  ...baseCase,
-  name: 'idbWrite100x5KB',
-  label: 'idb write 100x5KB',
-  benchmark: () => benchmarkWrite(100, generateString(5)),
-};
-
 export const idbWriteTestCases = [
-  write10x100B,
-  write100x100B,
-  write1000x100B,
-  write100x500B,
+  write1MB,
+  write1KB,
+  write1024x100B,
   write100x1KB,
-  write100x5KB,
 ];
