@@ -58,6 +58,6 @@ const write100x1KB: PerformanceTestCase = {
 export const cacheWriteTestCases = [
   write1MB,
   write1KB,
-  write100x1KB,
   write1024x100B,
+  write100x1KB,
 ];
