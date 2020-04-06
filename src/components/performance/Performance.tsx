@@ -5,6 +5,7 @@ import {
   getAllTestCases,
   getTestCase,
   runTest,
+  PerformanceTestCase,
 } from 'services/performance/performance';
 import {log} from 'services/logger';
 
@@ -22,19 +23,29 @@ export function Performance() {
     setSelectedName(e.target.value);
   }
 
-  async function handleClick() {
-    log(`${selectedTestCase.label} start`, 'performance');
+  async function handleStartAllBtnClick() {
+    const testCases = getAllTestCases();
+    for (const testCase of testCases) {
+      await runTestCase(testCase);
+    }
+  }
+
+  async function runTestCase(testCase: PerformanceTestCase) {
     setIsRunning(true);
-    const {ci, mean, median} = await runTest(selectedTestCase, percent => {
+    const {ci, mean, median} = await runTest(testCase, percent => {
       setFinishedTestCount(percent);
     });
     log(
-      `${selectedTestCase.label} - ${mean.toFixed(2)}ms(mean) ${median.toFixed(
+      `${testCase.label} - ${mean.toFixed(2)}ms(mean) ${median.toFixed(
         2
       )}ms(median) [${ci[0].toFixed(2)}, ${ci[1].toFixed(2)}]`,
       'performance'
     );
     setIsRunning(false);
+  }
+
+  async function handleStartBtnClick() {
+    runTestCase(selectedTestCase);
   }
 
   return (
@@ -54,8 +65,14 @@ export function Performance() {
         <button
           disabled={isRunning}
           className="performance-btn"
-          onClick={handleClick}>
+          onClick={handleStartBtnClick}>
           {isRunning ? finishedTestCount : 'Start'}
+        </button>
+        <button
+          disabled={isRunning}
+          className="performance-btn"
+          onClick={handleStartAllBtnClick}>
+          Run all tests
         </button>
         <div
           style={{backgroundImage: `url('kirby.gif')`}}
