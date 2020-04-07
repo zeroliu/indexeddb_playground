@@ -124,7 +124,7 @@ export class IdbAbuser extends BaseAbuser {
       transaction.onerror = () => {
         logError(transaction.error.message, 'idb');
         benchmarkAddToIdb.end();
-        reject();
+        reject(transaction.error);
       };
     });
   }
