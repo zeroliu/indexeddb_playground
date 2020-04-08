@@ -61,7 +61,7 @@ export class IdbAbuser extends BaseAbuser {
 
     if ('getDeviceStorage' in navigator) {
       const kaiOSNavigator = navigator as KaiOSNavigator;
-      const storage = kaiOSNavigator.getDeviceStorage('videos');
+      const storage = kaiOSNavigator.getDeviceStorage('apps');
       if (storage) {
         return new Promise((resolve, reject) => {
           const request = storage.freeSpace();
@@ -124,7 +124,7 @@ export class IdbAbuser extends BaseAbuser {
       transaction.onerror = () => {
         logError(transaction.error.message, 'idb');
         benchmarkAddToIdb.end();
-        reject();
+        reject(transaction.error);
       };
       transaction.onabort = () => {
         logError(transaction.error.message, 'idb');

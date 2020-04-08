@@ -1,8 +1,8 @@
-import {logError} from 'services/logger';
-import {Benchmark} from 'services/benchmark';
-import {BaseAbuser} from './base_abuser';
-import {generateString} from 'services/mock_data';
-import {v4 as uuid} from 'uuid';
+import { logError } from 'services/logger';
+import { Benchmark } from 'services/benchmark';
+import { BaseAbuser } from './base_abuser';
+import { generateString } from 'services/mock_data';
+import { v4 as uuid } from 'uuid';
 
 const CACHE_ABUSER_KEY = 'cache-abuser';
 
@@ -35,14 +35,14 @@ export class CacheAbuser extends BaseAbuser {
     if (quantity <= 0) {
       logError(
         'Please provide a positive number for quantity.',
-        'localStorage'
+        'localStorage',
       );
       return Promise.reject();
     }
     try {
       const content = generateString(sizeInKb);
       const benchmarkAdd = new Benchmark(
-        `Adding ${quantity} x ${sizeInKb}kb entries to cache.`
+        `Adding ${quantity} x ${sizeInKb}kb entries to cache.`,
       );
       const cache = await caches.open(CACHE_ABUSER_KEY);
       for (let i = 0; i < quantity; ++i) {
@@ -52,7 +52,7 @@ export class CacheAbuser extends BaseAbuser {
       return Promise.resolve();
     } catch (e) {
       logError(e.message, 'cacheAbuser');
-      return Promise.reject();
+      return Promise.reject(e);
     }
   }
 }

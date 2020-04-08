@@ -1,8 +1,8 @@
-import {logError} from 'services/logger';
-import {Benchmark} from 'services/benchmark';
-import {v4 as uuid} from 'uuid';
-import {BaseAbuser} from './base_abuser';
-import {generateString} from 'services/mock_data';
+import { logError } from 'services/logger';
+import { Benchmark } from 'services/benchmark';
+import { v4 as uuid } from 'uuid';
+import { BaseAbuser } from './base_abuser';
+import { generateString } from 'services/mock_data';
 
 export class LocalStorageAbuser extends BaseAbuser {
   constructor() {
@@ -32,14 +32,14 @@ export class LocalStorageAbuser extends BaseAbuser {
     if (quantity <= 0) {
       logError(
         'Please provide a positive number for quantity.',
-        'localStorage'
+        'localStorage',
       );
       return Promise.reject();
     }
     try {
       const content = generateString(sizeInKb);
       const benchmarkAdd = new Benchmark(
-        `Adding ${quantity} x ${sizeInKb}kb entries to localStorage`
+        `Adding ${quantity} x ${sizeInKb}kb entries to localStorage`,
       );
       for (let i = 0; i < quantity; ++i) {
         localStorage.setItem(uuid(), content);
@@ -48,7 +48,7 @@ export class LocalStorageAbuser extends BaseAbuser {
       return Promise.resolve();
     } catch (e) {
       logError(e.message, 'localStorage');
-      return Promise.reject();
+      return Promise.reject(e);
     }
   }
 }

@@ -12,11 +12,13 @@
     "url": "http://idb.zeroliu.com"
   },
   "default_locale": "en",
-  "type": "privileged",
+  "type": "certified",
   "permissions": {
     "device-storage:videos": {
       "access": "readonly"
-    }
+    },
+    "device-storage:apps":{ "access": "readonly" },
+    "webapps-manage":{ }
   },
   "cursor": true,
   "version": "0.01"
