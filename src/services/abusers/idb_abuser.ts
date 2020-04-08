@@ -1,7 +1,15 @@
+<<<<<<< Updated upstream
 import { Benchmark } from 'services/benchmark';
 import { logError, log } from 'services/logger';
 import { BaseAbuser } from './base_abuser';
 import { generateString } from 'services/mock_data';
+=======
+import {Benchmark} from 'services/benchmark';
+import {log, logError} from 'services/logger';
+import {generateString} from 'services/mock_data';
+>>>>>>> Stashed changes
+
+import {BaseAbuser} from './base_abuser';
 
 const DB_NAME = 'idb_playground_db';
 const DB_VERSION = 1;
@@ -15,7 +23,7 @@ interface KaiOSNavigator extends Navigator {
 }
 
 export class IdbAbuser extends BaseAbuser {
-  db: IDBDatabase | null = null;
+  db: IDBDatabase|null = null;
 
   constructor() {
     super('idb');
@@ -61,7 +69,7 @@ export class IdbAbuser extends BaseAbuser {
 
     if ('getDeviceStorage' in navigator) {
       const kaiOSNavigator = navigator as KaiOSNavigator;
-      const storage = kaiOSNavigator.getDeviceStorage('videos');
+      const storage = kaiOSNavigator.getDeviceStorage('apps');
       if (storage) {
         return new Promise((resolve, reject) => {
           const request = storage.freeSpace();
