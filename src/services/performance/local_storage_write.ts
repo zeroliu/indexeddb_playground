@@ -1,11 +1,16 @@
-import {generateString} from 'services/mock_data';
+import {generateString, fakeGithubResponse} from 'services/mock_data';
 import {PerformanceTestCase} from 'services/performance/performance';
 
-function benchmarkWrite(iteration: number, blob: string) {
+function benchmarkWrite(
+  iteration: number,
+  blob: string | object,
+  isJSON = false
+) {
   localStorage.clear();
   const start = performance.now();
   for (let i = 0; i < iteration; ++i) {
-    localStorage.setItem(`doc_${i}`, blob);
+    let data = isJSON ? JSON.stringify(blob) : blob;
+    localStorage.setItem(`doc_${i}`, data as string);
   }
   const end = performance.now();
   localStorage.clear();
@@ -13,7 +18,7 @@ function benchmarkWrite(iteration: number, blob: string) {
 }
 
 const baseCase = {
-  iteration: 1000,
+  iteration: 100,
 };
 
 const write1MB: PerformanceTestCase = {
@@ -28,6 +33,13 @@ const write1KB: PerformanceTestCase = {
   name: 'localStorageWrite1KB',
   label: 'localStorage write 1KB',
   benchmark: () => benchmarkWrite(1, generateString(1)),
+};
+
+const writeJSON: PerformanceTestCase = {
+  ...baseCase,
+  name: 'localStorageWriteJSON',
+  label: 'localStorage write 70KB JSON',
+  benchmark: () => benchmarkWrite(1, fakeGithubResponse, true),
 };
 
 const write1024x100B: PerformanceTestCase = {
@@ -49,4 +61,5 @@ export const localStorageWriteTestCases = [
   write1KB,
   write1024x100B,
   write100x1KB,
+  writeJSON,
 ];

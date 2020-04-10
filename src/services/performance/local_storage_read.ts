@@ -1,12 +1,14 @@
-import {generateString} from 'services/mock_data';
+import {generateString, fakeGithubResponse} from 'services/mock_data';
 import {PerformanceTestCase} from 'services/performance/performance';
 
-function benchmarkRead(iteration: number) {
+function benchmarkRead(iteration: number, isJSON = false) {
   const res: Record<string, string> = {};
   const start = performance.now();
   for (let i = 0; i < iteration; ++i) {
     const key = `doc_${i}`;
-    res[key] = localStorage.getItem(key)!;
+    let raw = localStorage.getItem(key)!;
+    const data = isJSON ? JSON.parse(raw) : raw;
+    res[key] = data;
   }
   const end = performance.now();
   return Promise.resolve(end - start);
@@ -26,7 +28,7 @@ function cleanup() {
 }
 
 const baseCase = {
-  iteration: 1000,
+  iteration: 100,
   cleanup,
 };
 
@@ -44,6 +46,14 @@ const read1KB: PerformanceTestCase = {
   label: 'localStorage read 1KB',
   benchmark: () => benchmarkRead(1),
   prep: () => prep(10, generateString(1)),
+};
+
+const readJSON: PerformanceTestCase = {
+  ...baseCase,
+  name: 'localStorageReadJSON',
+  label: 'localStorage read 70KB JSON',
+  benchmark: () => benchmarkRead(1, true),
+  prep: () => prep(10, JSON.stringify(fakeGithubResponse)),
 };
 
 const read1024x100B: PerformanceTestCase = {
@@ -67,4 +77,5 @@ export const localStorageReadTestCases = [
   read1KB,
   read1024x100B,
   read100x1KB,
+  readJSON,
 ];

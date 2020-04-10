@@ -1,4 +1,4 @@
-import {generateString} from 'services/mock_data';
+import {generateString, fakeGithubResponse} from 'services/mock_data';
 import {PerformanceTestCase} from 'services/performance/performance';
 
 const CACHE_PERFORMANCE_KEY = 'cache-performance';
@@ -11,11 +11,12 @@ async function cleanup() {
   await caches.delete(CACHE_PERFORMANCE_KEY);
 }
 
-async function benchmarkWrite(iteration: number, blob: string) {
+async function benchmarkWrite(iteration: number, blob: string, isJSON = false) {
   const start = performance.now();
   const cache = await caches.open(CACHE_PERFORMANCE_KEY);
+  const option = isJSON ? {headers: {'Content-Type': 'application/json'}} : {};
   for (let i = 0; i < iteration; ++i) {
-    cache.put(`doc_${i}`, new Response(blob));
+    cache.put(`doc_${i}`, new Response(blob, option));
   }
   const end = performance.now();
   return end - start;
@@ -41,6 +42,13 @@ const write1KB: PerformanceTestCase = {
   benchmark: () => benchmarkWrite(1, generateString(1)),
 };
 
+const writeJSON: PerformanceTestCase = {
+  ...baseCase,
+  name: 'cacheWriteJSON',
+  label: 'cache write 70KB JSON',
+  benchmark: () => benchmarkWrite(1, JSON.stringify(fakeGithubResponse), true),
+};
+
 const write1024x100B: PerformanceTestCase = {
   ...baseCase,
   name: 'cacheWrite1024x100B',
@@ -60,4 +68,5 @@ export const cacheWriteTestCases = [
   write1KB,
   write1024x100B,
   write100x1KB,
+  writeJSON,
 ];

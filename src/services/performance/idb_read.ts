@@ -1,31 +1,31 @@
-import {generateString} from 'services/mock_data';
+import {generateString, fakeGithubResponse} from 'services/mock_data';
 import {PerformanceTestCase} from 'services/performance/performance';
 import {logError} from 'services/logger';
 
-function prep(iteration: number, blob: string) {
+function prep(iteration: number, blob: string | object) {
   return new Promise<void>((resolve, reject) => {
     const request = indexedDB.open('idb-playground-benchmark', 1);
-    request.onerror = e => {
-      const msg = (e.target as any).error.message;
+    request.onerror = () => {
+      const msg = request.error!.message;
       logError(msg, 'idb_read');
       reject(msg);
     };
-    request.onupgradeneeded = e => {
-      const db = (e.target as any).result as IDBDatabase;
+    request.onupgradeneeded = () => {
+      const db = request.result as IDBDatabase;
       db.createObjectStore('entries', {
         keyPath: 'key',
       });
     };
 
-    request.onsuccess = e => {
-      const db = (e.target as any).result as IDBDatabase;
+    request.onsuccess = () => {
+      const db = request.result as IDBDatabase;
       const transaction = db.transaction('entries', 'readwrite');
       const store = transaction.objectStore('entries');
       for (let i = 0; i < iteration; ++i) {
         store.add({key: `doc_${i}`, blob});
       }
-      transaction.onerror = e => {
-        const msg = (e.target as any).error.message;
+      transaction.onerror = (e) => {
+        const msg = (e.target as any).error!.message;
         logError(msg, 'idb_read');
         reject(msg);
       };
@@ -40,8 +40,8 @@ function prep(iteration: number, blob: string) {
 function cleanup() {
   return new Promise<void>((resolve, reject) => {
     const request = indexedDB.deleteDatabase('idb-playground-benchmark');
-    request.onerror = e => {
-      const msg = (e.target as any).error.message;
+    request.onerror = () => {
+      const msg = request.error!.message;
       logError(msg, 'idb_read');
       reject(msg);
     };
@@ -82,14 +82,14 @@ function benchmarkReadGetAll() {
     const results: Record<string, {}> = {};
     const request = indexedDB.open('idb-playground-benchmark', 1);
 
-    request.onsuccess = e => {
-      const db = (e.target as any).result as IDBDatabase;
+    request.onsuccess = () => {
+      const db = request.result;
       const start = performance.now();
       const transaction = db.transaction('entries', 'readonly');
       const store = transaction.objectStore('entries');
       const getAllRequest = store.getAll();
-      getAllRequest.onsuccess = e => {
-        const items = (e.target as any).result;
+      getAllRequest.onsuccess = () => {
+        const items = getAllRequest.result;
         items.forEach((item: {key: string; blob: string}) => {
           results[item.key] = item.blob;
         });
@@ -97,8 +97,8 @@ function benchmarkReadGetAll() {
         db.close();
         resolve(end - start);
       };
-      getAllRequest.onerror = e => {
-        const msg = (e.target as any).error.message;
+      getAllRequest.onerror = () => {
+        const msg = getAllRequest.error!.message;
         logError(msg, 'idb_read');
         reject(msg);
       };
@@ -111,16 +111,16 @@ function benchmarkReadCursor() {
     const results: Record<string, {}> = {};
     const request = indexedDB.open('idb-playground-benchmark', 1);
 
-    request.onsuccess = e => {
-      const db = (e.target as any).result as IDBDatabase;
+    request.onsuccess = (e) => {
+      const db = request.result;
       const start = performance.now();
       const transaction = db.transaction('entries', 'readonly');
       const store = transaction.objectStore('entries');
-      const request = store.openCursor();
-      request.onsuccess = e => {
-        const cursor = (e.target as any).result;
+      const cursorRequest = store.openCursor();
+      cursorRequest.onsuccess = () => {
+        const cursor = cursorRequest.result;
         if (cursor) {
-          results[cursor.key] = cursor.value;
+          results[cursor.key as string] = cursor.value;
           cursor.continue();
         } else {
           const end = performance.now();
@@ -128,8 +128,8 @@ function benchmarkReadCursor() {
           resolve(end - start);
         }
       };
-      request.onerror = e => {
-        const msg = (e.target as any).error.message;
+      cursorRequest.onerror = () => {
+        const msg = cursorRequest.error!.message;
         logError(msg, 'idb_read');
         reject(msg);
       };
@@ -141,6 +141,14 @@ const baseCase = {
   // idb tests are really slow. Only run 100 iterations.
   iteration: 100,
   cleanup,
+};
+
+const readJSON: PerformanceTestCase = {
+  ...baseCase,
+  benchmark: () => benchmarkReadGetOne(),
+  name: 'idbReadJSON',
+  label: 'idb read 70KB JSON',
+  prep: () => prep(10, fakeGithubResponse),
 };
 
 const read1MB: PerformanceTestCase = {
@@ -204,4 +212,5 @@ export const idbReadTestCases = [
   read100x1KBGetAll,
   read1024x100BCursor,
   read100x1KBCursor,
+  readJSON,
 ];

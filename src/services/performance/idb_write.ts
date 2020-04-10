@@ -1,23 +1,23 @@
-import {generateString} from 'services/mock_data';
+import {generateString, fakeGithubResponse} from 'services/mock_data';
 import {PerformanceTestCase} from 'services/performance/performance';
 import {logError} from 'services/logger';
 
-function benchmarkWrite(iteration: number, blob: string) {
+function benchmarkWrite(iteration: number, blob: string | object) {
   return new Promise<number>((resolve, reject) => {
     const request = indexedDB.open('idb-playground-benchmark', 1);
     request.onerror = () => {
       logError('Error opening idb', 'idb_write');
       reject('Error opening idb');
     };
-    request.onupgradeneeded = e => {
-      const db = (e.target as any).result as IDBDatabase;
+    request.onupgradeneeded = () => {
+      const db = request.result;
       db.createObjectStore('entries', {
         keyPath: 'key',
       });
     };
 
-    request.onsuccess = e => {
-      const db = (e.target as any).result as IDBDatabase;
+    request.onsuccess = () => {
+      const db = request.result;
       const start = performance.now();
       const transaction = db.transaction('entries', 'readwrite');
       const store = transaction.objectStore('entries');
@@ -63,6 +63,13 @@ const write1KB: PerformanceTestCase = {
   benchmark: () => benchmarkWrite(1, generateString(1)),
 };
 
+const writeJSON: PerformanceTestCase = {
+  ...baseCase,
+  name: 'idbWriteJSON',
+  label: 'idb write 70KB JSON',
+  benchmark: () => benchmarkWrite(1, fakeGithubResponse),
+};
+
 const write1024x100B: PerformanceTestCase = {
   ...baseCase,
   name: 'idbWrite1024x100B',
@@ -82,4 +89,5 @@ export const idbWriteTestCases = [
   write1KB,
   write1024x100B,
   write100x1KB,
+  writeJSON,
 ];
