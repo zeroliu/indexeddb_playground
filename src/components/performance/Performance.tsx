@@ -32,7 +32,7 @@ export function Performance() {
 
   async function runTestCase(testCase: PerformanceTestCase) {
     setIsRunning(true);
-    const {ci, mean, median} = await runTest(testCase, percent => {
+    const {ci, mean, median} = await runTest(testCase, (percent) => {
       setFinishedTestCount(percent);
     });
     log(
@@ -55,7 +55,7 @@ export function Performance() {
         className="performance-select"
         value={selectedTestCase.name}
         onChange={selectTestCase}>
-        {testCases.map(testCase => (
+        {testCases.map((testCase) => (
           <option key={testCase.name} value={testCase.name}>
             {testCase.label}
           </option>

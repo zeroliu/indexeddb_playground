@@ -123,11 +123,11 @@ export class IdbAbuser extends BaseAbuser {
       };
       transaction.onerror = () => {
         benchmarkAddToIdb.end();
-        handleError(transaction.error!, this.name);
+        handleError(transaction.error!, this.name, reject);
       };
       transaction.onabort = () => {
         benchmarkAddToIdb.end();
-        handleError(transaction.error!, this.name);
+        handleError(transaction.error!, this.name, reject);
       };
     });
   }
