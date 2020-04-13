@@ -1,14 +1,14 @@
 import {generateString, fakeGithubResponse} from 'services/mock_data';
 import {PerformanceTestCase} from 'services/performance/performance';
-import {logError} from 'services/logger';
+import {handleError} from 'services/error';
+
+const CONTEXT = 'idb_read';
 
 function prep(iteration: number, blob: string | object) {
   return new Promise<void>((resolve, reject) => {
     const request = indexedDB.open('idb-playground-benchmark', 1);
     request.onerror = () => {
-      const msg = request.error!.message;
-      logError(msg, 'idb_read');
-      reject(msg);
+      handleError(request.error!, CONTEXT, reject);
     };
     request.onupgradeneeded = () => {
       const db = request.result as IDBDatabase;
@@ -24,10 +24,8 @@ function prep(iteration: number, blob: string | object) {
       for (let i = 0; i < iteration; ++i) {
         store.add({key: `doc_${i}`, blob});
       }
-      transaction.onerror = (e) => {
-        const msg = (e.target as any).error!.message;
-        logError(msg, 'idb_read');
-        reject(msg);
+      transaction.onerror = () => {
+        handleError(transaction.error!, CONTEXT, reject);
       };
       transaction.oncomplete = () => {
         db.close();
@@ -41,9 +39,7 @@ function cleanup() {
   return new Promise<void>((resolve, reject) => {
     const request = indexedDB.deleteDatabase('idb-playground-benchmark');
     request.onerror = () => {
-      const msg = request.error!.message;
-      logError(msg, 'idb_read');
-      reject(msg);
+      handleError(request.error!, CONTEXT, reject);
     };
     request.onsuccess = () => {
       resolve();
@@ -69,9 +65,7 @@ function benchmarkReadGetOne() {
         resolve(end - start);
       };
       getRequest.onerror = () => {
-        const msg = getRequest.error!.message;
-        logError(msg, 'idb_read');
-        reject(msg);
+        handleError(getRequest.error!, CONTEXT, reject);
       };
     };
   });
@@ -98,9 +92,7 @@ function benchmarkReadGetAll() {
         resolve(end - start);
       };
       getAllRequest.onerror = () => {
-        const msg = getAllRequest.error!.message;
-        logError(msg, 'idb_read');
-        reject(msg);
+        handleError(getAllRequest.error!, CONTEXT, reject);
       };
     };
   });
@@ -129,9 +121,7 @@ function benchmarkReadCursor() {
         }
       };
       cursorRequest.onerror = () => {
-        const msg = cursorRequest.error!.message;
-        logError(msg, 'idb_read');
-        reject(msg);
+        handleError(cursorRequest.error!, CONTEXT, reject);
       };
     };
   });
