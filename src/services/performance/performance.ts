@@ -6,6 +6,7 @@ import {idbReadTestCases} from './idb_read';
 import {idbRangeReadTestCases} from './idb_range_read';
 import {cacheWriteTestCases} from './cache_write';
 import {cacheReadTestCases} from './cache_read';
+import {idbOpenTestCases} from './idb_open';
 
 export interface PerformanceTestCase {
   name: string;
@@ -38,11 +39,11 @@ export function getTestCase(name: string) {
 }
 
 export function getAllTestCases() {
-  return Object.keys(testCases).map(key => testCases[key]);
+  return Object.keys(testCases).map((key) => testCases[key]);
 }
 
 function nextFrame<T>(callback: () => T): Promise<T> {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     requestAnimationFrame(() => {
       setTimeout(() => {
         resolve(callback());
@@ -55,7 +56,7 @@ export async function runTest(
   testCase: PerformanceTestCase,
   onProgress: (percent: string) => void
 ): Promise<PerformanceReport> {
-  return new Promise(async resolve => {
+  return new Promise(async (resolve) => {
     const results = [];
     if (testCase.prep) {
       await testCase.prep();
@@ -80,5 +81,6 @@ addTestCases(localStorageReadTestCases);
 addTestCases(idbWriteTestCases);
 addTestCases(idbReadTestCases);
 addTestCases(idbRangeReadTestCases);
+addTestCases(idbOpenTestCases);
 addTestCases(cacheWriteTestCases);
 addTestCases(cacheReadTestCases);

@@ -1,6 +1,5 @@
 import {generateString} from 'services/mock_data';
 import {PerformanceTestCase} from 'services/performance/performance';
-import {logError} from 'services/logger';
 import {handleError} from 'services/error';
 
 const CONTEXT = 'idb_range_read';

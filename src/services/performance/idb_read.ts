@@ -11,14 +11,14 @@ function prep(iteration: number, blob: string | object) {
       handleError(request.error!, CONTEXT, reject);
     };
     request.onupgradeneeded = () => {
-      const db = request.result as IDBDatabase;
+      const db = request.result;
       db.createObjectStore('entries', {
         keyPath: 'key',
       });
     };
 
     request.onsuccess = () => {
-      const db = request.result as IDBDatabase;
+      const db = request.result;
       const transaction = db.transaction('entries', 'readwrite');
       const store = transaction.objectStore('entries');
       for (let i = 0; i < iteration; ++i) {
