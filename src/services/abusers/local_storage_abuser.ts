@@ -1,8 +1,8 @@
-import { logError } from 'services/logger';
-import { Benchmark } from 'services/benchmark';
-import { v4 as uuid } from 'uuid';
-import { BaseAbuser } from './base_abuser';
-import { generateString } from 'services/mock_data';
+import {Benchmark} from 'services/benchmark';
+import {v4 as uuid} from 'uuid';
+import {BaseAbuser} from './base_abuser';
+import {generateString} from 'services/mock_data';
+import {handleError} from 'services/error';
 
 export class LocalStorageAbuser extends BaseAbuser {
   constructor() {
@@ -30,16 +30,14 @@ export class LocalStorageAbuser extends BaseAbuser {
 
   fill(sizeInKb: number, quantity: number): Promise<void> {
     if (quantity <= 0) {
-      logError(
-        'Please provide a positive number for quantity.',
-        'localStorage',
-      );
-      return Promise.reject();
+      const err = new Error('Please provide a positive number for quantity.');
+      handleError(err, this.name);
+      return Promise.reject(err);
     }
     try {
       const content = generateString(sizeInKb);
       const benchmarkAdd = new Benchmark(
-        `Adding ${quantity} x ${sizeInKb}kb entries to localStorage`,
+        `Adding ${quantity} x ${sizeInKb}kb entries to localStorage`
       );
       for (let i = 0; i < quantity; ++i) {
         localStorage.setItem(uuid(), content);
@@ -47,7 +45,7 @@ export class LocalStorageAbuser extends BaseAbuser {
       benchmarkAdd.end();
       return Promise.resolve();
     } catch (e) {
-      logError(e.message, 'localStorage');
+      handleError(e, this.name);
       return Promise.reject(e);
     }
   }

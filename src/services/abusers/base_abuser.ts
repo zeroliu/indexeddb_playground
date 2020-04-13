@@ -1,4 +1,4 @@
-import { log, logError } from 'services/logger';
+import {log} from 'services/logger';
 
 export abstract class BaseAbuser {
   autoFillStarted = false;
@@ -17,7 +17,6 @@ export abstract class BaseAbuser {
     try {
       await this.fill(sizeInKb, 1);
     } catch (e) {
-      logError(e.message, this.name);
       this.autoFillStarted = false;
       log('Auto fill stopped', this.name);
     }

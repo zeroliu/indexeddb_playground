@@ -1,7 +1,8 @@
 import {Benchmark} from 'services/benchmark';
-import {logError, log} from 'services/logger';
+import {log} from 'services/logger';
 import {BaseAbuser} from './base_abuser';
 import {generateString} from 'services/mock_data';
+import {handleError} from 'services/error';
 
 const DB_NAME = 'idb_playground_db';
 const DB_VERSION = 1;
@@ -25,8 +26,7 @@ export class IdbAbuser extends BaseAbuser {
     return new Promise((resolve, reject) => {
       const request = indexedDB.open(DB_NAME, DB_VERSION);
       request.onerror = () => {
-        logError('Error opening indexedDB.', this.name);
-        reject();
+        handleError(request.error!, this.name, reject);
       };
       request.onsuccess = () => {
         this.db = request.result;
@@ -40,7 +40,7 @@ export class IdbAbuser extends BaseAbuser {
         });
         store.transaction.oncomplete = () => {};
         store.transaction.onerror = () => {
-          logError('Error creating object store', this.name);
+          handleError(store.transaction.error!, this.name);
         };
       };
     });
@@ -48,9 +48,9 @@ export class IdbAbuser extends BaseAbuser {
 
   checkIdb() {
     if (!this.db) {
-      const err = 'DB is not initialized.';
-      logError(err, this.name);
-      throw new Error(err);
+      const err = new Error('DB is not initialized');
+      handleError(err, this.name);
+      throw err;
     }
   }
 
@@ -69,7 +69,7 @@ export class IdbAbuser extends BaseAbuser {
             resolve({quota: request.result});
           };
           request.onerror = () => {
-            reject(request.error);
+            handleError(request.error, this.name, reject);
           };
         });
       }
@@ -85,12 +85,11 @@ export class IdbAbuser extends BaseAbuser {
     store.clear();
     return new Promise((resolve, reject) => {
       transaction.oncomplete = () => {
-        log('Successfully cleared idb.', 'idb');
+        log('Successfully cleared idb.', this.name);
         resolve();
       };
       transaction.onerror = () => {
-        logError(transaction.error.message, 'idb');
-        reject();
+        handleError(transaction.error, this.name, reject);
       };
     });
   }
@@ -98,8 +97,9 @@ export class IdbAbuser extends BaseAbuser {
   fill(sizeInKb: number, quantity: number): Promise<void> {
     this.checkIdb();
     if (quantity <= 0) {
-      logError('Please provide a positive number for quantity.', 'idb');
-      return Promise.reject();
+      const err = new Error('quantity not provided');
+      handleError(err, this.name);
+      return Promise.reject(err);
     }
     const content = generateString(sizeInKb);
     const benchmarkCreateObj = new Benchmark('Creating idb objects');
@@ -112,7 +112,7 @@ export class IdbAbuser extends BaseAbuser {
       const blob = new Blob([content], {type: 'text/plain'});
       const request = store.add(blob);
       request.onerror = () => {
-        logError(request.error!.message, 'idb');
+        handleError(request.error!, this.name);
       };
     }
     benchmarkCreateObj.end();
@@ -122,14 +122,12 @@ export class IdbAbuser extends BaseAbuser {
         resolve();
       };
       transaction.onerror = () => {
-        logError(transaction.error.message, 'idb');
         benchmarkAddToIdb.end();
-        reject(transaction.error);
+        handleError(transaction.error!, this.name);
       };
       transaction.onabort = () => {
-        logError(transaction.error.message, 'idb');
         benchmarkAddToIdb.end();
-        reject();
+        handleError(transaction.error!, this.name);
       };
     });
   }

@@ -1,13 +1,14 @@
 import {generateString, fakeGithubResponse} from 'services/mock_data';
 import {PerformanceTestCase} from 'services/performance/performance';
-import {logError} from 'services/logger';
+import {handleError} from 'services/error';
+
+const CONTEXT = 'idb_write';
 
 function benchmarkWrite(iteration: number, blob: string | object) {
   return new Promise<number>((resolve, reject) => {
     const request = indexedDB.open('idb-playground-benchmark', 1);
     request.onerror = () => {
-      logError('Error opening idb', 'idb_write');
-      reject('Error opening idb');
+      handleError(request.error!, CONTEXT, reject);
     };
     request.onupgradeneeded = () => {
       const db = request.result;
@@ -25,18 +26,18 @@ function benchmarkWrite(iteration: number, blob: string | object) {
         store.add({key: `doc_${i}`, blob});
       }
       transaction.onerror = () => {
-        logError('Error adding items to idb', 'idb_write');
-        reject('Error adding items to idb');
+        handleError(transaction.error!, CONTEXT, reject);
       };
       transaction.oncomplete = () => {
         const end = performance.now();
         db.close();
-        const request = indexedDB.deleteDatabase('idb-playground-benchmark');
-        request.onerror = () => {
-          logError('Error deleting idb', 'idb_write');
-          reject('Error deleting idb');
+        const deletionRequest = indexedDB.deleteDatabase(
+          'idb-playground-benchmark'
+        );
+        deletionRequest.onerror = () => {
+          handleError(deletionRequest.error!, CONTEXT, reject);
         };
-        request.onsuccess = () => {
+        deletionRequest.onsuccess = () => {
           resolve(end - start);
         };
       };

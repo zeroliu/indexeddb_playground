@@ -1,8 +1,8 @@
-import { logError } from 'services/logger';
-import { Benchmark } from 'services/benchmark';
-import { BaseAbuser } from './base_abuser';
-import { generateString } from 'services/mock_data';
-import { v4 as uuid } from 'uuid';
+import {Benchmark} from 'services/benchmark';
+import {BaseAbuser} from './base_abuser';
+import {generateString} from 'services/mock_data';
+import {v4 as uuid} from 'uuid';
+import {handleError} from 'services/error';
 
 const CACHE_ABUSER_KEY = 'cache-abuser';
 
@@ -13,8 +13,10 @@ export class CacheAbuser extends BaseAbuser {
 
   init(): Promise<void> {
     if (!('caches' in window)) {
-      logError('Cache is not supported', 'cacheAbuser');
+      const err = new Error('Cache is not supported');
+      handleError(err, this.name);
     }
+
     // CacheAPI does not need to initialize.
     return Promise.resolve();
   }
@@ -33,16 +35,14 @@ export class CacheAbuser extends BaseAbuser {
 
   async fill(sizeInKb: number, quantity: number): Promise<void> {
     if (quantity <= 0) {
-      logError(
-        'Please provide a positive number for quantity.',
-        'localStorage',
-      );
-      return Promise.reject();
+      const err = new Error('Please provide a positive number for quantity.');
+      handleError(err, this.name);
+      return Promise.reject(err);
     }
     try {
       const content = generateString(sizeInKb);
       const benchmarkAdd = new Benchmark(
-        `Adding ${quantity} x ${sizeInKb}kb entries to cache.`,
+        `Adding ${quantity} x ${sizeInKb}kb entries to cache.`
       );
       const cache = await caches.open(CACHE_ABUSER_KEY);
       for (let i = 0; i < quantity; ++i) {
@@ -51,7 +51,7 @@ export class CacheAbuser extends BaseAbuser {
       benchmarkAdd.end();
       return Promise.resolve();
     } catch (e) {
-      logError(e.message, 'cacheAbuser');
+      handleError(e, this.name);
       return Promise.reject(e);
     }
   }
