@@ -12,12 +12,14 @@ async function cleanup() {
 }
 
 async function benchmarkWrite(iteration: number, blob: string, isJSON = false) {
-  const start = performance.now();
   const cache = await caches.open(CACHE_PERFORMANCE_KEY);
+  const start = performance.now();
   const option = isJSON ? {headers: {'Content-Type': 'application/json'}} : {};
+  const promises: Array<Promise<void>> = [];
   for (let i = 0; i < iteration; ++i) {
-    cache.put(`doc_${i}`, new Response(blob, option));
+    promises.push(cache.put(`doc_${i}`, new Response(blob, option)));
   }
+  await Promise.all(promises);
   const end = performance.now();
   return end - start;
 }

@@ -6,9 +6,11 @@ const CACHE_PERFORMANCE_KEY = 'cache-performance';
 async function prep(iteration: number, blob: string, isJSON = false) {
   const cache = await caches.open(CACHE_PERFORMANCE_KEY);
   const option = isJSON ? {headers: {'Content-Type': 'application/json'}} : {};
+  const promises: Array<Promise<void>> = [];
   for (let i = 0; i < iteration; ++i) {
-    cache.put(`doc_${i}`, new Response(blob, option));
+    promises.push(cache.put(`doc_${i}`, new Response(blob, option)));
   }
+  await Promise.all(promises);
 }
 
 async function cleanup() {
@@ -17,8 +19,8 @@ async function cleanup() {
 
 async function benchmarkRead(iteration: number, isJSON = false) {
   const results: Record<string, any> = {};
-  const start = performance.now();
   const cache = await caches.open(CACHE_PERFORMANCE_KEY);
+  const start = performance.now();
   for (let i = 0; i < iteration; ++i) {
     const response = await cache.match(`doc_${i}`);
     if (isJSON) {
