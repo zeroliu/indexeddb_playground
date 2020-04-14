@@ -21,14 +21,19 @@ async function benchmarkRead(iteration: number, isJSON = false) {
   const results: Record<string, any> = {};
   const cache = await caches.open(CACHE_PERFORMANCE_KEY);
   const start = performance.now();
+  const promises: Array<Promise<void>> = [];
   for (let i = 0; i < iteration; ++i) {
-    const response = await cache.match(`doc_${i}`);
-    if (isJSON) {
-      results[`doc_${i}`] = await response?.json();
-    } else {
-      results[`doc_${i}`] = await response?.text();
-    }
+    promises.push(
+      cache.match(`doc_${i}`).then(async (response) => {
+        if (isJSON) {
+          results[`doc_${i}`] = await response?.json();
+        } else {
+          results[`doc_${i}`] = await response?.text();
+        }
+      })
+    );
   }
+  await Promise.all(promises);
   const end = performance.now();
   return end - start;
 }
