@@ -10,6 +10,7 @@ import {
 import {log} from 'services/logger';
 
 import './performance.css';
+import {nextFrame} from 'services/next_frame';
 
 /** Sub panel to test performance. */
 export function Performance() {
@@ -26,7 +27,7 @@ export function Performance() {
   async function handleStartAllBtnClick() {
     const testCases = getAllTestCases();
     for (const testCase of testCases) {
-      await runTestCase(testCase);
+      await nextFrame(() => runTestCase(testCase));
     }
   }
 

@@ -7,6 +7,7 @@ import {idbRangeReadTestCases} from './idb_range_read';
 import {cacheWriteTestCases} from './cache_write';
 import {cacheReadTestCases} from './cache_read';
 import {idbOpenTestCases} from './idb_open';
+import {nextFrame} from 'services/next_frame';
 
 export interface PerformanceTestCase {
   name: string;
@@ -40,16 +41,6 @@ export function getTestCase(name: string) {
 
 export function getAllTestCases() {
   return Object.keys(testCases).map((key) => testCases[key]);
-}
-
-function nextFrame<T>(callback: () => T): Promise<T> {
-  return new Promise((resolve) => {
-    requestAnimationFrame(() => {
-      setTimeout(() => {
-        resolve(callback());
-      }, 0);
-    });
-  });
 }
 
 export async function runTest(
