@@ -8,13 +8,6 @@ const DB_NAME = 'idb_playground_db';
 const DB_VERSION = 1;
 const ABUSER_STORE = 'abuser';
 
-interface KaiOSDeviceStorage {
-  freeSpace: () => any;
-}
-interface KaiOSNavigator extends Navigator {
-  getDeviceStorage: (type: string) => KaiOSDeviceStorage;
-}
-
 export class IdbAbuser extends BaseAbuser {
   db: IDBDatabase | null = null;
 
@@ -52,30 +45,6 @@ export class IdbAbuser extends BaseAbuser {
       handleError(err, this.name);
       throw err;
     }
-  }
-
-  estimate(): Promise<StorageEstimate> {
-    if ('storage' in navigator && 'estimate' in navigator.storage) {
-      return navigator.storage.estimate();
-    }
-
-    if ('getDeviceStorage' in navigator) {
-      const kaiOSNavigator = navigator as KaiOSNavigator;
-      const storage = kaiOSNavigator.getDeviceStorage('apps');
-      if (storage) {
-        return new Promise((resolve, reject) => {
-          const request = storage.freeSpace();
-          request.onsuccess = () => {
-            resolve({quota: request.result});
-          };
-          request.onerror = () => {
-            handleError(request.error, this.name, reject);
-          };
-        });
-      }
-    }
-
-    return Promise.resolve({});
   }
 
   clear(): Promise<void> {

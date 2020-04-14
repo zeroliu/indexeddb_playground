@@ -21,13 +21,6 @@ export class CacheAbuser extends BaseAbuser {
     return Promise.resolve();
   }
 
-  estimate(): Promise<StorageEstimate> {
-    if ('storage' in navigator && 'estimate' in navigator.storage) {
-      return navigator.storage.estimate();
-    }
-    return Promise.resolve({});
-  }
-
   async clear(): Promise<void> {
     await caches.delete(CACHE_ABUSER_KEY);
     return Promise.resolve();

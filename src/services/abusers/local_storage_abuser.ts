@@ -14,15 +14,6 @@ export class LocalStorageAbuser extends BaseAbuser {
     return Promise.resolve();
   }
 
-  estimate(): Promise<StorageEstimate> {
-    return Promise.resolve({
-      usage: new Blob([
-        ...Object.values(localStorage),
-        ...Object.keys(localStorage),
-      ]).size,
-    });
-  }
-
   clear(): Promise<void> {
     localStorage.clear();
     return Promise.resolve();

@@ -5,7 +5,6 @@ export abstract class BaseAbuser {
 
   constructor(readonly name: string) {}
 
-  abstract estimate(): Promise<StorageEstimate>;
   abstract init(): Promise<void>;
   abstract clear(): Promise<void>;
   abstract fill(sizeInKb: number, quantity: number): Promise<void>;
