@@ -45,6 +45,58 @@ function benchmarkWrite(iteration: number, blob: string | object) {
   });
 }
 
+function benchmarkSeriallyWrite(iteration: number, blob: string | object) {
+  return new Promise<number>((resolve, reject) => {
+    const request = indexedDB.open('idb-playground-benchmark', 1);
+    request.onerror = () => {
+      handleError(request.error!, CONTEXT, reject);
+    };
+    request.onupgradeneeded = () => {
+      const db = request.result;
+      db.createObjectStore('entries', {
+        keyPath: 'key',
+      });
+    };
+
+    request.onsuccess = () => {
+      const db = request.result;
+      const start = performance.now();
+      const transaction = db.transaction('entries', 'readwrite');
+      const store = transaction.objectStore('entries');
+      const queue: any[] = [];
+      for (let i = 0; i < iteration; ++i) {
+        queue.push({key: `doc_${i}`, blob});
+      }
+      transaction.onerror = () => {
+        handleError(transaction.error!, CONTEXT, reject);
+      };
+      transaction.oncomplete = () => {
+        const end = performance.now();
+        db.close();
+        const deletionRequest = indexedDB.deleteDatabase(
+          'idb-playground-benchmark'
+        );
+        deletionRequest.onerror = () => {
+          handleError(deletionRequest.error!, CONTEXT, reject);
+        };
+        deletionRequest.onsuccess = () => {
+          resolve(end - start);
+        };
+      };
+      const add = () => {
+        if (queue.length > 0) {
+          const data = queue.shift();
+          const addRequest = store.add(data);
+          addRequest.addEventListener('success', () => {
+            add();
+          });
+        }
+      };
+      add();
+    };
+  });
+}
+
 const baseCase = {
   // idb tests are really slow. Only run 100 iterations.
   iteration: 100,
@@ -71,6 +123,13 @@ const writeJSON: PerformanceTestCase = {
   benchmark: () => benchmarkWrite(1, fakeGithubResponse),
 };
 
+const writeJSONSerially: PerformanceTestCase = {
+  ...baseCase,
+  name: 'idbWriteJSONSerially',
+  label: 'idb write 70KB JSON serially',
+  benchmark: () => benchmarkSeriallyWrite(1, fakeGithubResponse),
+};
+
 const write1024x100B: PerformanceTestCase = {
   ...baseCase,
   name: 'idbWrite1024x100B',
@@ -91,4 +150,5 @@ export const idbWriteTestCases = [
   write1024x100B,
   write100x1KB,
   writeJSON,
+  writeJSONSerially,
 ];
