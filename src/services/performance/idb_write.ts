@@ -1,10 +1,11 @@
-import {generateString, fakeGithubResponse} from 'services/mock_data';
-import {PerformanceTestCase} from 'services/performance/performance';
 import {handleError} from 'services/error';
+import {CustomIdbDatabase} from 'services/idb';
+import {fakeGithubResponse, generateString} from 'services/mock_data';
+import {PerformanceTestCase} from 'services/performance/performance';
 
 const CONTEXT = 'idb_write';
 
-function benchmarkWrite(iteration: number, blob: string | object) {
+function benchmarkWrite(iteration: number, blob: string|object) {
   return new Promise<number>((resolve, reject) => {
     const request = indexedDB.open('idb-playground-benchmark', 1);
     request.onerror = () => {
@@ -31,9 +32,8 @@ function benchmarkWrite(iteration: number, blob: string | object) {
       transaction.oncomplete = () => {
         const end = performance.now();
         db.close();
-        const deletionRequest = indexedDB.deleteDatabase(
-          'idb-playground-benchmark'
-        );
+        const deletionRequest =
+            indexedDB.deleteDatabase('idb-playground-benchmark');
         deletionRequest.onerror = () => {
           handleError(deletionRequest.error!, CONTEXT, reject);
         };
@@ -45,7 +45,7 @@ function benchmarkWrite(iteration: number, blob: string | object) {
   });
 }
 
-function benchmarkSeriallyWrite(iteration: number, blob: string | object) {
+function benchmarkSeriallyWrite(iteration: number, blob: string|object) {
   return new Promise<number>((resolve, reject) => {
     const request = indexedDB.open('idb-playground-benchmark', 1);
     request.onerror = () => {
@@ -73,9 +73,8 @@ function benchmarkSeriallyWrite(iteration: number, blob: string | object) {
       transaction.oncomplete = () => {
         const end = performance.now();
         db.close();
-        const deletionRequest = indexedDB.deleteDatabase(
-          'idb-playground-benchmark'
-        );
+        const deletionRequest =
+            indexedDB.deleteDatabase('idb-playground-benchmark');
         deletionRequest.onerror = () => {
           handleError(deletionRequest.error!, CONTEXT, reject);
         };
@@ -93,6 +92,46 @@ function benchmarkSeriallyWrite(iteration: number, blob: string | object) {
         }
       };
       add();
+    };
+  });
+}
+
+function benchmarkLongTransactionWrite(iteration: number, blob: string|object) {
+  return new Promise<number>((resolve, reject) => {
+    const request = indexedDB.open('idb-playground-benchmark', 1);
+    request.onerror = () => {
+      handleError(request.error!, CONTEXT, reject);
+    };
+    request.onupgradeneeded = () => {
+      const db = request.result;
+      db.createObjectStore('entries', {
+        keyPath: 'key',
+      });
+    };
+
+    request.onsuccess = async () => {
+      const db = new CustomIdbDatabase(request.result);
+      const start = performance.now();
+      try {
+        await db.withTransaction(['entries'], 'readwrite', async (tx) => {
+          const store = tx.objectStore('entries');
+          for (let i = 0; i < iteration; ++i) {
+            await store.add({key: `doc_${i}`, blob});
+          }
+        });
+      } catch (e) {
+        handleError(e, CONTEXT, reject);
+      }
+      const end = performance.now();
+      db.close();
+      const deletionRequest =
+          indexedDB.deleteDatabase('idb-playground-benchmark');
+      deletionRequest.onerror = () => {
+        handleError(deletionRequest.error!, CONTEXT, reject);
+      };
+      deletionRequest.onsuccess = () => {
+        resolve(end - start);
+      };
     };
   });
 }
@@ -119,15 +158,22 @@ const write1KB: PerformanceTestCase = {
 const writeJSON: PerformanceTestCase = {
   ...baseCase,
   name: 'idbWriteJSON',
-  label: 'idb write 70KB JSON',
-  benchmark: () => benchmarkWrite(1, fakeGithubResponse),
+  label: 'idb write 10x70KB JSON',
+  benchmark: () => benchmarkWrite(10, fakeGithubResponse),
 };
 
 const writeJSONSerially: PerformanceTestCase = {
   ...baseCase,
   name: 'idbWriteJSONSerially',
-  label: 'idb write 70KB JSON serially',
-  benchmark: () => benchmarkSeriallyWrite(1, fakeGithubResponse),
+  label: 'idb write 10x70KB JSON serially',
+  benchmark: () => benchmarkSeriallyWrite(10, fakeGithubResponse),
+};
+
+const writeJSONWithLongTransaction: PerformanceTestCase = {
+  ...baseCase,
+  name: 'idbWriteJSONSeriallyWithLongTransaction',
+  label: 'idb write 10x70KB JSON serially with long transaction',
+  benchmark: () => benchmarkLongTransactionWrite(10, fakeGithubResponse),
 };
 
 const write1024x100B: PerformanceTestCase = {
@@ -151,4 +197,5 @@ export const idbWriteTestCases = [
   write100x1KB,
   writeJSON,
   writeJSONSerially,
+  writeJSONWithLongTransaction,
 ];
