@@ -1,15 +1,16 @@
 import {Benchmark} from 'services/benchmark';
-import {log} from 'services/logger';
-import {BaseAbuser} from './base_abuser';
-import {generateString} from 'services/mock_data';
 import {handleError} from 'services/error';
+import {log} from 'services/logger';
+import {generateString} from 'services/mock_data';
+
+import {BaseAbuser} from './base_abuser';
 
 const DB_NAME = 'idb_playground_db';
 const DB_VERSION = 1;
 const ABUSER_STORE = 'abuser';
 
 export class IdbAbuser extends BaseAbuser {
-  db: IDBDatabase | null = null;
+  db: IDBDatabase|null = null;
 
   constructor() {
     super('idb');
@@ -72,9 +73,8 @@ export class IdbAbuser extends BaseAbuser {
     }
     const content = generateString(sizeInKb);
     const benchmarkCreateObj = new Benchmark('Creating idb objects');
-    const benchmarkAddToIdb = new Benchmark(
-      `Adding ${quantity} x ${sizeInKb}kb entries to idb`
-    );
+    const benchmarkAddToIdb =
+        new Benchmark(`Adding ${quantity} x ${sizeInKb}kb entries to idb`);
     const transaction = this.db!.transaction(ABUSER_STORE, 'readwrite');
     const store = transaction.objectStore(ABUSER_STORE);
     for (let i = 0; i < quantity; ++i) {
@@ -90,13 +90,15 @@ export class IdbAbuser extends BaseAbuser {
         benchmarkAddToIdb.end();
         resolve();
       };
-      transaction.onerror = () => {
+      transaction.onerror = (e) => {
         benchmarkAddToIdb.end();
-        handleError(transaction.error!, this.name, reject);
+        console.log(e);
+        handleError(transaction.error, this.name, reject);
       };
-      transaction.onabort = () => {
+      transaction.onabort = (e) => {
         benchmarkAddToIdb.end();
-        handleError(transaction.error!, this.name, reject);
+        console.log(e);
+        handleError(transaction.error, this.name, reject);
       };
     });
   }
