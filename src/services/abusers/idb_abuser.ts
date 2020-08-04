@@ -81,7 +81,7 @@ export class IdbAbuser extends BaseAbuser {
       const blob = new Blob([content], {type: 'text/plain'});
       const request = store.add(blob);
       request.onerror = () => {
-        handleError(request.error!, this.name);
+        handleError(request.error, `${this.name} - request.onerror`, reject);
       };
     }
     benchmarkCreateObj.end();
@@ -93,12 +93,14 @@ export class IdbAbuser extends BaseAbuser {
       transaction.onerror = (e) => {
         benchmarkAddToIdb.end();
         console.log(e);
-        handleError(transaction.error, this.name, reject);
+        handleError(
+            transaction.error, `${this.name} - transaction.onerror`, reject);
       };
       transaction.onabort = (e) => {
         benchmarkAddToIdb.end();
         console.log(e);
-        handleError(transaction.error, this.name, reject);
+        handleError(
+            transaction.error, `${this.name} - transaction.onabort`, reject);
       };
     });
   }
