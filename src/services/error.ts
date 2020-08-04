@@ -6,9 +6,9 @@ export function handleError(
     reject?: (err?: Error) => void,
 ) {
   if (err) {
-    console.error(`message: ${err.message}, code: ${(err as any).code}, name: ${
-        err.name}`);
-    logError(err.message, context);
+    const errMsg = `message: "${err.message}", name: "${err.name}"`;
+    console.error(errMsg);
+    logError(errMsg, context);
   }
   if (reject) {
     reject(err);
