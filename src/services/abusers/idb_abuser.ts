@@ -81,7 +81,7 @@ export class IdbAbuser extends BaseAbuser {
       const blob = new Blob([content], {type: 'text/plain'});
       const request = store.add(blob);
       request.onerror = () => {
-        handleError(request.error, `${this.name} - request.onerror`, reject);
+        handleError(request.error, `${this.name} - request.onerror`);
       };
     }
     benchmarkCreateObj.end();
