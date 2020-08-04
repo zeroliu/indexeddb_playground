@@ -6,16 +6,9 @@ export function handleError(
     reject?: (err?: Error) => void,
 ) {
   if (err) {
-    if ('message' in err) {
-      logError(err.message, context);
-      console.error(err.message);
-    }
-    if ('code' in err) {
-      console.error(err.code);
-    }
-    if ('name' in err) {
-      console.error(err.name);
-    }
+    console.error(`message: ${err.message}, code: ${(err as any).code}, name: ${
+        err.name}`);
+    logError(err.message, context);
   }
   if (reject) {
     reject(err);
