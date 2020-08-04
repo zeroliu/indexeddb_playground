@@ -1,7 +1,7 @@
 import {logError} from './logger';
 
 export function handleError(
-    err: DOMException|Error|undefined,
+    err: DOMException|Error|undefined|null,
     context: string,
     reject?: (err?: Error) => void,
 ) {
