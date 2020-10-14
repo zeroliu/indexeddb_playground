@@ -1,8 +1,8 @@
-import React, {useEffect, useRef, useState} from 'react';
-import {logsSelector} from 'model/logs/logs_selectors';
-import {useSelector} from 'react-redux';
+import React, { useEffect, useRef, useState } from 'react';
+import { logsSelector } from 'model/logs/logs_selectors';
+import { useSelector } from 'react-redux';
 import './logger.css';
-import {LogType, getEnabledStatus, setEnabledStatus} from 'services/logger';
+import { LogType, getEnabledStatus, setEnabledStatus } from 'services/logger';
 
 const LOG_CLASS = {
   [LogType.ERROR]: 'logger-error',
@@ -24,6 +24,7 @@ export function Logger() {
 
   return (
     <div className="logger">
+      <div className="user-agent">{navigator.userAgent}</div>
       <label className="logger-toggle">
         Enable logs:
         <input

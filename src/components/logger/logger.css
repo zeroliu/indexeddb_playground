@@ -18,3 +18,8 @@
 .logger-toggle {
   margin: 10px;
 }
+
+.user-agent {
+  border-bottom: 1px solid #aaa;
+  font-size: 10px;
+}
