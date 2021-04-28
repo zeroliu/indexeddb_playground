@@ -5,6 +5,50 @@ import {PerformanceTestCase} from 'services/performance/performance';
 
 const CONTEXT = 'idb_write';
 
+function benchmarkWriteMultiTx(iteration: number, blob: string|object) {
+  return new Promise<number>((resolve, reject) => {
+    const request = indexedDB.open('idb-playground-benchmark', 1);
+    request.onerror = () => {
+      handleError(request.error!, CONTEXT, reject);
+    };
+    request.onupgradeneeded = () => {
+      const db = request.result;
+      db.createObjectStore('entries', {
+        keyPath: 'key',
+      });
+    };
+
+    request.onsuccess = () => {
+      const db = request.result;
+      const start = performance.now();
+      let completedTx = 0;
+      for (let i = 0; i < iteration; ++i) {
+        const transaction = db.transaction('entries', 'readwrite');
+        const store = transaction.objectStore('entries');
+        store.add({key: `doc_${i}`, blob});
+        transaction.onerror = () => {
+          handleError(transaction.error!, CONTEXT, reject);
+        };
+        transaction.oncomplete = () => {
+          completedTx++;
+          if (completedTx >= iteration) {
+            const end = performance.now();
+            db.close();
+            const deletionRequest =
+                indexedDB.deleteDatabase('idb-playground-benchmark');
+            deletionRequest.onerror = () => {
+              handleError(deletionRequest.error!, CONTEXT, reject);
+            };
+            deletionRequest.onsuccess = () => {
+              resolve(end - start);
+            };
+          }
+        };
+      }
+    };
+  });
+}
+
 function benchmarkWrite(iteration: number, blob: string|object) {
   return new Promise<number>((resolve, reject) => {
     const request = indexedDB.open('idb-playground-benchmark', 1);
@@ -147,6 +191,18 @@ const write1MB: PerformanceTestCase = {
   label: 'idb write 1MB',
   benchmark: () => benchmarkWrite(1, generateString(1024)),
 };
+const write1MBx50: PerformanceTestCase = {
+  ...baseCase,
+  name: 'idbWrite1MBx50',
+  label: 'idb write 50x1MB',
+  benchmark: () => benchmarkWrite(50, generateString(1024)),
+};
+const write1MBx50MultiTx: PerformanceTestCase = {
+  ...baseCase,
+  name: 'idbWrite1MBx50MultiTx',
+  label: 'idb write 50x1MB in multiple transactions',
+  benchmark: () => benchmarkWriteMultiTx(50, generateString(1024)),
+};
 
 const write1KB: PerformanceTestCase = {
   ...baseCase,
@@ -198,4 +254,6 @@ export const idbWriteTestCases = [
   writeJSON,
   writeJSONSerially,
   writeJSONWithLongTransaction,
+  write1MBx50,
+  write1MBx50MultiTx,
 ];
