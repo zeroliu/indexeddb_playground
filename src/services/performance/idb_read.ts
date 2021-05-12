@@ -1,10 +1,10 @@
-import {generateString, fakeGithubResponse} from 'services/mock_data';
-import {PerformanceTestCase} from 'services/performance/performance';
 import {handleError} from 'services/error';
+import {fakeGithubResponse, generateString} from 'services/mock_data';
+import {PerformanceTestCase} from 'services/performance/performance';
 
 const CONTEXT = 'idb_read';
 
-function prep(iteration: number, blob: string | object) {
+function prep(iteration: number, blob: string|object) {
   return new Promise<void>((resolve, reject) => {
     const request = indexedDB.open('idb-playground-benchmark', 1);
     request.onerror = () => {
@@ -60,14 +60,36 @@ function benchmarkReadGetOne() {
       const getRequest = store.get('doc_1');
       getRequest.onsuccess = () => {
         results['doc_1'] = getRequest.result;
-        const end = performance.now();
-        db.close();
-        resolve(end - start);
       };
       getRequest.onerror = () => {
         handleError(getRequest.error!, CONTEXT, reject);
       };
+      transaction.oncomplete = () => {
+        const end = performance.now();
+        db.close();
+        resolve(end - start);
+      }
     };
+  });
+}
+
+function getKeys() {
+  return new Promise<string[]>((resolve, reject) => {
+    const request = indexedDB.open('idb-playground-benchmark', 1);
+
+    request.onsuccess = () => {
+      const db = request.result;
+      const transaction = db.transaction('entries', 'readonly');
+      const store = transaction.objectStore('entries');
+      const getAllRequest = store.getAllKeys();
+      getAllRequest.onsuccess = () => {
+        resolve(getAllRequest.result as string[]);
+      };
+      db.close();
+    };
+    request.onerror = () => {
+      handleError(request.error!, CONTEXT, reject);
+    }
   });
 }
 
@@ -87,13 +109,91 @@ function benchmarkReadGetAll() {
         items.forEach((item: {key: string; blob: string}) => {
           results[item.key] = item.blob;
         });
-        const end = performance.now();
-        db.close();
-        resolve(end - start);
       };
       getAllRequest.onerror = () => {
         handleError(getAllRequest.error!, CONTEXT, reject);
       };
+      transaction.oncomplete = () => {
+        const end = performance.now();
+        db.close();
+        resolve(end - start);
+      }
+    };
+  });
+}
+
+function benchmarkReadParallelGet() {
+  return new Promise<number>((resolve, reject) => {
+    const results: Record<string, {}> = {};
+    const request = indexedDB.open('idb-playground-benchmark', 1);
+
+    request.onsuccess = async () => {
+      const db = request.result;
+      const keys = await getKeys();
+      const start = performance.now();
+      const transaction = db.transaction('entries', 'readonly');
+      const store = transaction.objectStore('entries');
+      for (let key of keys) {
+        const getRequest = store.get(key);
+        getRequest.onsuccess = () => {
+          const item = getRequest.result;
+          results[item.key] = item.blob;
+        };
+      }
+      transaction.onerror = () => {
+        handleError(transaction.error!, CONTEXT, reject);
+      };
+      transaction.oncomplete = () => {
+        const end = performance.now();
+        db.close();
+        resolve(end - start);
+      }
+    };
+  });
+}
+
+function readItem(
+    store: IDBObjectStore, results: Record<string, {}>, keys: string[],
+    index: number) {
+  if (index >= keys.length) {
+    return;
+  }
+  const getRequest = store.get(keys[index]);
+  getRequest.onsuccess = () => {
+    const item = getRequest.result;
+    results[item.key] = item.blob;
+    readItem(store, results, keys, index + 1);
+  };
+}
+
+function benchmarkReadSerialGet() {
+  return new Promise<number>((resolve, reject) => {
+    const results: Record<string, {}> = {};
+    const request = indexedDB.open('idb-playground-benchmark', 1);
+
+    request.onsuccess = async () => {
+      const db = request.result;
+      const keys = await getKeys();
+      const start = performance.now();
+      const transaction = db.transaction('entries', 'readonly');
+      const store = transaction.objectStore('entries');
+      readItem(store, results, keys, 0);
+
+      for (let key of keys) {
+        const getRequest = store.get(key);
+        getRequest.onsuccess = () => {
+          const item = getRequest.result;
+          results[item.key] = item.blob;
+        };
+      }
+      transaction.onerror = () => {
+        handleError(transaction.error!, CONTEXT, reject);
+      };
+      transaction.oncomplete = () => {
+        const end = performance.now();
+        db.close();
+        resolve(end - start);
+      }
     };
   });
 }
@@ -114,15 +214,16 @@ function benchmarkReadCursor() {
         if (cursor) {
           results[cursor.key as string] = cursor.value;
           cursor.continue();
-        } else {
-          const end = performance.now();
-          db.close();
-          resolve(end - start);
         }
       };
       cursorRequest.onerror = () => {
         handleError(cursorRequest.error!, CONTEXT, reject);
       };
+      transaction.oncomplete = () => {
+        const end = performance.now();
+        db.close();
+        resolve(end - start);
+      }
     };
   });
 }
@@ -176,6 +277,22 @@ const read100x1KBGetAll: PerformanceTestCase = {
   prep: () => prep(100, generateString(1)),
 };
 
+const read100x1KBParallelGet: PerformanceTestCase = {
+  ...baseCase,
+  name: 'idbRead100x1KBParallelGet',
+  label: 'idb read 100x1KB by sending get requests in parallel',
+  prep: () => prep(100, generateString(1)),
+  benchmark: () => benchmarkReadParallelGet(),
+}
+
+const read100x1KBSerialGet: PerformanceTestCase = {
+  ...baseCase,
+  name: 'idbRead100x1KBSerialGet',
+  label: 'idb read 100x1KB by sending get requests one by one',
+  prep: () => prep(100, generateString(1)),
+  benchmark: () => benchmarkReadSerialGet(),
+}
+
 const cursorBaseCase = {
   ...baseCase,
   benchmark: () => benchmarkReadCursor(),
@@ -200,6 +317,8 @@ export const idbReadTestCases = [
   read1KB,
   read1024x100BGetAll,
   read100x1KBGetAll,
+  read100x1KBParallelGet,
+  read100x1KBSerialGet,
   read1024x100BCursor,
   read100x1KBCursor,
   readJSON,

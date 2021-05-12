@@ -29,6 +29,8 @@ function benchmarkWriteMultiTx(iteration: number, blob: string|object) {
         transaction.onerror = () => {
           handleError(transaction.error!, CONTEXT, reject);
         };
+        // We intentionally modify completedTx outside of the loop.
+        // eslint-disable-next-line
         transaction.oncomplete = () => {
           completedTx++;
           if (completedTx >= iteration) {
