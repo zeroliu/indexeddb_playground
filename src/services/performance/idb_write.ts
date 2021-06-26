@@ -91,7 +91,7 @@ function benchmarkWrite(iteration: number, blob: string|object) {
   });
 }
 
-function benchmarkWriteWithContention() {
+function benchmarkWriteWithContention(contentionCount: number) {
   return new Promise<number>((resolve, reject) => {
     let completed = 0;
     let end = 0;
@@ -127,7 +127,7 @@ function benchmarkWriteWithContention() {
           const db = request2.result;
           const transaction = db.transaction('entries', 'readwrite');
           const store = transaction.objectStore('entries');
-          for (let i = 0; i < 1000; ++i) {
+          for (let i = 0; i < contentionCount; ++i) {
             store.put({key: `doc_0`, blob10K});
           }
           transaction.onerror = () => {
@@ -275,11 +275,18 @@ const baseCase = {
   iteration: 100,
 };
 
-const write1MBx100WithContention: PerformanceTestCase = {
+const write1MBx100WithContention1000x10KB: PerformanceTestCase = {
   ...baseCase,
-  name: 'idbWrite1MBWithContention',
-  label: 'idb write 100x1MB with contention',
-  benchmark: () => benchmarkWriteWithContention(),
+  name: 'idbWrite1MBWithContention1000x10KB',
+  label: 'idb write 100x1MB with contention (1000x10KB)',
+  benchmark: () => benchmarkWriteWithContention(1000),
+}
+
+const write1MBx100WithContention100x10KB: PerformanceTestCase = {
+  ...baseCase,
+  name: 'idbWrite1MBWithContention100x10KB',
+  label: 'idb write 100x1MB with contention (100x10KB)',
+  benchmark: () => benchmarkWriteWithContention(100),
 }
 
 const write1MB: PerformanceTestCase = {
@@ -344,7 +351,8 @@ const write100x1KB: PerformanceTestCase = {
 };
 
 export const idbWriteTestCases = [
-  write1MBx100WithContention,
+  write1MBx100WithContention100x10KB,
+  write1MBx100WithContention1000x10KB,
   write1MB,
   write1KB,
   write1024x100B,
