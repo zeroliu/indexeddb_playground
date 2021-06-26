@@ -122,18 +122,18 @@ function benchmarkWriteWithContention() {
         });
       };
       request2.onsuccess = () => {
+        start = performance.now();
         {
           const db = request2.result;
           const transaction = db.transaction('entries', 'readwrite');
           const store = transaction.objectStore('entries');
-          for (let i = 0; i < 100; ++i) {
+          for (let i = 0; i < 1000; ++i) {
             store.put({key: `doc_0`, blob10K});
           }
           transaction.onerror = () => {
             handleError(transaction.error!, CONTEXT, reject);
           };
           transaction.oncomplete = () => {
-            const end = performance.now();
             db.close();
             const deletionRequest =
                 indexedDB.deleteDatabase('idb-playground-benchmark-2');
@@ -149,7 +149,6 @@ function benchmarkWriteWithContention() {
           };
         }
         {
-          start = performance.now();
           const db = request.result;
           const transaction = db.transaction('entries', 'readwrite');
           const store = transaction.objectStore('entries');
